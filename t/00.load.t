@@ -1,7 +1,9 @@
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 BEGIN {
-use_ok( 'App::Subcmd' );
+    use_ok( 'App::Subcmd' );
 }
 
-diag( "Testing App::Subcmd $App::Subcmd::VERSION" );
+note( "Testing App::Subcmd $App::Subcmd::VERSION" );
+
+can_ok( 'App::Subcmd', qw/new run synopsis help shell/ );

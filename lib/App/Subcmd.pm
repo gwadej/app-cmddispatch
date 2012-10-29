@@ -4,34 +4,116 @@ use warnings;
 use strict;
 use Carp;
 
-use version; $VERSION = qv('0.0.3');
+our $VERSION = 0.003;
 
-# Other recommended modules (uncomment to use):
-#  use IO::Prompt;
-#  use Perl6::Export;
-#  use Perl6::Slurp;
-#  use Perl6::Say;
+sub new {
+    my ($class, $commands, $options) = @_;
+    $options ||= {};
+    die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
+    die "Options parameter is not a hashref.\n" unless ref $options eq ref {};
 
+    return bless {}, $class;
+}
 
-# Module implementation here
+sub run {
+}
 
+sub synopsis {
+}
+
+sub help {
+}
+
+sub shell {
+}
 
 1;
 __END__
 
 =head1 NAME
 
-App::Subcmd - [One line description of module's purpose here]
-
+App::Subcmd - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::Subcmd version 0.0.3
-
+This document describes App::Subcmd version 0.003
 
 =head1 SYNOPSIS
 
     use App::Subcmd;
+
+    my %commands = (
+        'start'   => {
+            code => \&log_event,
+            synopsis => 'start {event description}',
+            help => 'Stop last event and start timing a new event.',
+        },
+        'stop'    => {
+            code => sub { log_event( 'stop' ); },
+            synopsis => 'stop',
+            help => 'Stop timing last event.',
+        },
+        'push'    => {
+            code => \&push_event,
+            synopsis => 'push {event description}',
+            help => 'Save last event on stack and start timing new event.',
+        },
+        'pop'     => {
+            code => \&pop_event,
+            synopsis => 'pop',
+            help => 'Stop last event and restart top event on stack.',
+        },
+        'drop'    => {
+            code => \&drop_event,
+            synopsis => 'drop [all|{n}]',
+            help => 'Drop one or more items from top of event stack or all if argument supplied.',
+        },
+        'nip'    => {
+            code => \&nip_event,
+            synopsis => 'nip',
+            help => 'Drop one item from under the top of event stack.',
+        },
+        'ls'      => {
+            code => \&list_events,
+            synopsis => 'ls [date]',
+            help => 'List events for the specified day. Default to today.',
+        },
+        'lsproj'  => {
+            code => \&list_projects,
+            synopsis => 'lsproj',
+            help => 'List known projects.',
+        },
+        'lstk'    => {
+            code => \&list_stack,
+            synopsis => 'lstk',
+            help => 'Display items on the stack.',
+        },
+        'edit'    => {
+            code => sub { system $config{'editor'}, $config{'logfile'}; },
+            synopsis => 'edit',
+            help => 'Open the timelog file in the current editor',
+        },
+        'help'    => {
+            code => \&usage,
+            synopsis => 'help [commands|aliases]',
+            help => 'A list of commands and/or aliases. Limit display with the argument.',
+        },
+        'report'  => {
+            code => \&daily_report,
+            synopsis => 'report [date [end date]]',
+            help => 'Display a report for the specified days.',
+        },
+        'summary' => {
+            code => \&daily_summary,
+            synopsis => 'summary [date [end date]]',
+            help => q{Display a summary of the appropriate days' projects.},
+        },
+        'hours' => {
+            code => \&report_hours,
+            synopsis => 'hours [date [end date]]',
+            help => q{Display the hours worked for each of the appropriate days.},
+        },
+    );
 
 =for author to fill in:
     Brief code example(s) here showing commonest usage(s).
@@ -48,12 +130,15 @@ This document describes App::Subcmd version 0.0.3
 
 =head1 INTERFACE 
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+=head2 new
 
+=head2 run
+
+=head2 synopsis
+
+=head2 help
+
+=head2 shell 
 
 =head1 DIAGNOSTICS
 
