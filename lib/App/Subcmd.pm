@@ -6,25 +6,113 @@ use Carp;
 
 our $VERSION = 0.003;
 
-sub new {
-    my ($class, $commands, $options) = @_;
+sub new
+{
+    my ( $class, $commands, $options ) = @_;
     $options ||= {};
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
-    die "Options parameter is not a hashref.\n" unless ref $options eq ref {};
+    die "Options parameter is not a hashref.\n"  unless ref $options  eq ref {};
 
-    return bless {}, $class;
+    my $self = bless { cmds => {}, alias => {} }, $class;
+
+    # Set defaults
+    $self->{cmds}->{help}     => sub { return $self->help( @_ ); };
+    $self->{cmds}->{synopsis} => sub { return $self->synopsis( @_ ); };
+    $self->{cmds}->{shell}    => sub { return $self->shell( @_ ); };
+
+    $self->_ensure_valid_command_description( $commands );
+
+    return $self;
 }
 
-sub run {
+sub run
+{
+    my ( $self, $cmd, @args ) = @_;
+
+    # Handle alias if one is supplied
+    if ( exists $self->{'alias'}->{$cmd} )
+    {
+        ( $cmd, @args ) = ( ( split / /, $self->{'alias'}->{$cmd} ), @args );
+    }
+
+    # Handle builtin commands
+    if ( exists $self->{cmds}->{$cmd} )
+    {
+        $self->{cmds}->{$cmd}->{'code'}->( @args );
+    }
+    else
+    {
+        print "Unrecognized command '$cmd'\n\n";
+        $self->help();
+    }
+    return;
 }
 
-sub synopsis {
+sub synopsis
+{
+    my ( $self, $arg ) = @_;
+    if ( !$arg or $arg eq 'commands' )
+    {
+        print "\nCommands:\n";
+        foreach my $c ( sort keys %{ $self->{cmds} } )
+        {
+            my $d = $self->{cmds}->{$c};
+            print "$d->{synopsis}\n";
+        }
+    }
+    if ( !$arg or $arg eq 'aliases' )
+    {
+        $self->_list_aliases();
+    }
+    return;
 }
 
-sub help {
+sub help
+{
+    my ( $self, $arg ) = @_;
+    if ( !$arg or $arg eq 'commands' )
+    {
+        print "\nCommands:\n";
+        foreach my $c ( sort keys %{ $self->{cmds} } )
+        {
+            my $d = $self->{cmds}->{$c};
+            print "$d->{synopsis}\n        $d->{help}\n";
+        }
+    }
+    if ( !$arg or $arg eq 'aliases' )
+    {
+        $self->_list_aliases();
+    }
+    return;
 }
 
-sub shell {
+sub _list_aliases
+{
+    my ( $self ) = @_;
+    print "\nAliases:\n";
+    foreach my $c ( sort keys %{ $self->{'alias'} } )
+    {
+        print "$c\t: $self->{'alias'}->{$c}\n";
+    }
+    return;
+}
+
+sub shell
+{
+    my ( $self ) = @_;
+}
+
+sub _ensure_valid_command_description
+{
+    my ( $self, $cmds ) = @_;
+
+    while ( my ( $key, $val ) = each %{$cmds} )
+    {
+        die "Command '$key' is an invalid descriptor.\n" unless ref $val eq ref {};
+        $self->{cmds}->{$key} = { %{$val} };
+    }
+
+    return;
 }
 
 1;
