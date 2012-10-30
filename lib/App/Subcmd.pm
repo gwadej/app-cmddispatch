@@ -2,9 +2,9 @@ package App::Subcmd;
 
 use warnings;
 use strict;
-use Carp;
+use Config::Tiny;
 
-our $VERSION = 0.003;
+our $VERSION = '0.003_01';
 
 sub new
 {
@@ -13,12 +13,23 @@ sub new
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
     die "Options parameter is not a hashref.\n"  unless ref $options  eq ref {};
 
-    my $self = bless { cmds => {}, alias => {} }, $class;
+    my %config      = %{$options};
+    my $config_file = delete $config{config};
 
-    # Set defaults
-    $self->{cmds}->{help}     => sub { return $self->help( @_ ); };
-    $self->{cmds}->{synopsis} => sub { return $self->synopsis( @_ ); };
-    $self->{cmds}->{shell}    => sub { return $self->shell( @_ ); };
+    my $self = bless {
+        cmds    => {},
+        alias   => {},
+        config  => \%config,
+        readfh  => \*STDIN,
+        writefh => \*STDOUT,
+    }, $class;
+
+    $self->_initialize_config( $config_file ) if defined $config_file and -f $config_file;
+
+    # Set defaults with closures that reference this object
+    $self->{cmds}->{help}     = sub { return $self->help( @_ ); };
+    $self->{cmds}->{synopsis} = sub { return $self->synopsis( @_ ); };
+    $self->{cmds}->{shell}    = sub { return $self->shell( @_ ); };
 
     $self->_ensure_valid_command_description( $commands );
 
@@ -42,7 +53,7 @@ sub run
     }
     else
     {
-        print "Unrecognized command '$cmd'\n\n";
+        $self->_print( "Unrecognized command '$cmd'\n\n" );
         $self->help();
     }
     return;
@@ -53,11 +64,11 @@ sub synopsis
     my ( $self, $arg ) = @_;
     if ( !$arg or $arg eq 'commands' )
     {
-        print "\nCommands:\n";
+        $self->_print( "\nCommands:\n" );
         foreach my $c ( sort keys %{ $self->{cmds} } )
         {
             my $d = $self->{cmds}->{$c};
-            print "$d->{synopsis}\n";
+            $self->_print( "$d->{synopsis}\n" );
         }
     }
     if ( !$arg or $arg eq 'aliases' )
@@ -72,11 +83,11 @@ sub help
     my ( $self, $arg ) = @_;
     if ( !$arg or $arg eq 'commands' )
     {
-        print "\nCommands:\n";
+        $self->_print( "\nCommands:\n" );
         foreach my $c ( sort keys %{ $self->{cmds} } )
         {
             my $d = $self->{cmds}->{$c};
-            print "$d->{synopsis}\n        $d->{help}\n";
+            $self->_print( "$d->{synopsis}\n        $d->{help}\n" );
         }
     }
     if ( !$arg or $arg eq 'aliases' )
@@ -89,10 +100,10 @@ sub help
 sub _list_aliases
 {
     my ( $self ) = @_;
-    print "\nAliases:\n";
+    $self->_print( "\nAliases:\n" );
     foreach my $c ( sort keys %{ $self->{'alias'} } )
     {
-        print "$c\t: $self->{'alias'}->{$c}\n";
+        $self->_print( "$c\t: $self->{'alias'}->{$c}\n" );
     }
     return;
 }
@@ -100,6 +111,15 @@ sub _list_aliases
 sub shell
 {
     my ( $self ) = @_;
+
+    $self->_print( "Enter a command or 'quit' to exit:\n" );
+    while ( my $line = $self->_prompt( '> ' ) )
+    {
+        chomp $line;
+        last if $line eq 'quit';
+        $self->run( split /\s+/, $line );
+    }
+    return;
 }
 
 sub _ensure_valid_command_description
@@ -115,6 +135,33 @@ sub _ensure_valid_command_description
     return;
 }
 
+sub _initialize_config
+{
+    my ( $self, $config_file ) = @_;
+    my $conf = Config::Tiny->read( $config_file );
+    %{$self->{alias}} = %{delete $conf->{alias}};
+    %{$self->{config}} = (
+        ($conf->{_} ? %{delete $conf->{_}} : ()),   # first extract the top level
+        %{$conf},                                   # Keep any multi-levels that are not aliases
+        %{$self->{config}},                         # Override with supplied parameters
+    );
+    return;
+}
+
+sub _print
+{
+    my $self = shift;
+    print { $self->{writefh} } @_;
+    return;
+}
+
+sub _prompt
+{
+    my $self = shift;
+    print { $self->{writefh} } @_;
+    return readline( $self->{readfh} );
+}
+
 1;
 __END__
 
@@ -124,7 +171,7 @@ App::Subcmd - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::Subcmd version 0.003
+This document describes App::Subcmd version 0.003_01
 
 =head1 SYNOPSIS
 
