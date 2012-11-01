@@ -3,7 +3,7 @@ package App::Subcmd;
 use warnings;
 use strict;
 use Config::Tiny;
-use Term::Readline;
+use Term::ReadLine;
 
 our $VERSION = '0.003_01';
 
@@ -54,8 +54,9 @@ sub run
     my ( $self, $cmd, @args ) = @_;
 
     if ( !defined $cmd ) {
-        $self->_print( 'Missing command' );
+        $self->_print( "Missing command\n\n" );
         $self->help();
+        return;
     }
 
     # Handle alias if one is supplied
@@ -72,7 +73,7 @@ sub run
     else
     {
         $self->_print( "Unrecognized command '$cmd'\n\n" );
-        $self->help();
+        $self->synopsis();
     }
     return;
 }
@@ -101,7 +102,7 @@ sub synopsis
 {
     my ( $self, $arg ) = @_;
 
-    if ( $self->{cmds}->{$arg} )
+    if ( defined $arg && $self->{cmds}->{$arg} )
     {
         $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
         return;
@@ -119,15 +120,22 @@ sub synopsis
     {
         $self->_list_aliases();
     }
+
+    if ($arg && !exists $self->{cmds}->{$arg})
+    {
+         $self->_print( "Unrecognized command '$arg'\n" );
+    }
+
     return;
 }
 
 sub help
 {
     my ( $self, $arg ) = @_;
-    if ( $self->{cmds}->{$arg} )
+
+    if ( defined $arg && $self->{cmds}->{$arg} )
     {
-        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n", $self->_help_string( $arg ), "\n" );
+        $self->_print( "\n", $self->_cmd_synopsis(), $self->_synopsis_string( $arg ), "\n", ($self->_help_string( $arg ) || "        Sorry, '$arg' does not currently have any help information"), "\n" );
         return;
     }
 
@@ -136,13 +144,19 @@ sub help
         $self->_print( "\nCommands:\n" );
         foreach my $c ( $self->_command_list() )
         {
-            $self->_print( $self->_synopsis_string( $c ), "\n", $self->_help_string( $c ), "\n" );
+            $self->_print( $self->_synopsis_string( $c ), "\n   ", $self->_help_string( $c ), "\n" );
         }
     }
     if ( !$arg or $arg eq 'aliases' )
     {
         $self->_list_aliases();
     }
+
+    if ($arg && !exists $self->{cmds}->{$arg}) 
+    {
+         $self->_print( "Unrecognized command '$arg'\n" );
+    }
+
     return;
 }
 
@@ -214,7 +228,10 @@ sub _prompt
 }
 
 1;
+
 __END__
+
+=encoding utf-8
 
 =head1 NAME
 
