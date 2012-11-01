@@ -27,9 +27,21 @@ sub new
     $self->_initialize_config( $config_file ) if defined $config_file and -f $config_file;
 
     # Set defaults with closures that reference this object
-    $self->{cmds}->{help}     = sub { return $self->help( @_ ); };
-    $self->{cmds}->{synopsis} = sub { return $self->synopsis( @_ ); };
-    $self->{cmds}->{shell}    = sub { return $self->shell( @_ ); };
+    $self->{cmds}->{help}     = {
+        code => sub { return $self->help( @_ ); },
+        synopsis => 'help [command|alias]',
+        help => 'Display help about commands and/or aliases. Limit display with the argument.',
+    };
+    $self->{cmds}->{synopsis} = {
+        code => sub { return $self->synopsis( @_ ); },
+        synopsis => 'synopsis [command|alias]',
+        help => 'A list of commands and/or aliases. Limit display with the argument.',
+    };
+    $self->{cmds}->{shell}    = {
+        code => sub { return $self->shell( @_ ); },
+        synopsis => 'shell',
+        help => 'Execute commands as entered until quit.',
+    };
 
     $self->_ensure_valid_command_description( $commands );
 
@@ -40,6 +52,11 @@ sub run
 {
     my ( $self, $cmd, @args ) = @_;
 
+    if ( !defined $cmd ) {
+        $self->_print( 'Missing command' );
+        $self->help();
+    }
+
     # Handle alias if one is supplied
     if ( exists $self->{'alias'}->{$cmd} )
     {
@@ -47,7 +64,7 @@ sub run
     }
 
     # Handle builtin commands
-    if ( exists $self->{cmds}->{$cmd} )
+    if ( $self->{cmds}->{$cmd} )
     {
         $self->{cmds}->{$cmd}->{'code'}->( @args );
     }
@@ -62,6 +79,13 @@ sub run
 sub synopsis
 {
     my ( $self, $arg ) = @_;
+
+    if ( $self->{cmds}->{$arg} )
+    {
+        $self->_print( "\n$self->{cmds}->{$arg}->{synopsis}\n" );
+        return;
+    }
+
     if ( !$arg or $arg eq 'commands' )
     {
         $self->_print( "\nCommands:\n" );
@@ -81,6 +105,12 @@ sub synopsis
 sub help
 {
     my ( $self, $arg ) = @_;
+    if ( $self->{cmds}->{$arg} )
+    {
+        $self->_print( "\n$self->{cmds}->{$arg}->{synopsis}\n        $self->{cmds}->{$arg}->{help}\n" );
+        return;
+    }
+
     if ( !$arg or $arg eq 'commands' )
     {
         $self->_print( "\nCommands:\n" );
@@ -100,6 +130,8 @@ sub help
 sub _list_aliases
 {
     my ( $self ) = @_;
+    return unless keys %{ $self->{'alias'} };
+
     $self->_print( "\nAliases:\n" );
     foreach my $c ( sort keys %{ $self->{'alias'} } )
     {
