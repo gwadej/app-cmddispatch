@@ -3,6 +3,7 @@ package App::Subcmd;
 use warnings;
 use strict;
 use Config::Tiny;
+use Term::Readline;
 
 our $VERSION = '0.003_01';
 
@@ -76,23 +77,42 @@ sub run
     return;
 }
 
+sub _command_list
+{
+    my ($self) = @_;
+    return (sort grep { $_ ne 'help' && $_ ne 'synopsis' } keys %{$self->{cmds}}), qw/synopsis help/;
+}
+
+sub _synopsis_string
+{
+    my ($self, $cmd) = @_;
+    return '' if !defined $cmd || !$self->{cmds}->{$cmd};
+    return $self->{cmds}->{$cmd}->{synopsis} || $cmd;
+}
+
+sub _help_string
+{
+    my ($self, $cmd) = @_;
+    return '' if !defined $cmd || !$self->{cmds}->{$cmd}->{help};
+    return "        $self->{cmds}->{$cmd}->{help}";
+}
+
 sub synopsis
 {
     my ( $self, $arg ) = @_;
 
     if ( $self->{cmds}->{$arg} )
     {
-        $self->_print( "\n$self->{cmds}->{$arg}->{synopsis}\n" );
+        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
         return;
     }
 
     if ( !$arg or $arg eq 'commands' )
     {
         $self->_print( "\nCommands:\n" );
-        foreach my $c ( sort keys %{ $self->{cmds} } )
+        foreach my $c ( $self->_command_list() )
         {
-            my $d = $self->{cmds}->{$c};
-            $self->_print( "$d->{synopsis}\n" );
+            $self->_print( $self->_synopsis_string( $c ), "\n" );
         }
     }
     if ( !$arg or $arg eq 'aliases' )
@@ -107,17 +127,16 @@ sub help
     my ( $self, $arg ) = @_;
     if ( $self->{cmds}->{$arg} )
     {
-        $self->_print( "\n$self->{cmds}->{$arg}->{synopsis}\n        $self->{cmds}->{$arg}->{help}\n" );
+        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n", $self->_help_string( $arg ), "\n" );
         return;
     }
 
     if ( !$arg or $arg eq 'commands' )
     {
         $self->_print( "\nCommands:\n" );
-        foreach my $c ( sort keys %{ $self->{cmds} } )
+        foreach my $c ( $self->_command_list() )
         {
-            my $d = $self->{cmds}->{$c};
-            $self->_print( "$d->{synopsis}\n        $d->{help}\n" );
+            $self->_print( $self->_synopsis_string( $c ), "\n", $self->_help_string( $c ), "\n" );
         }
     }
     if ( !$arg or $arg eq 'aliases' )
@@ -209,91 +228,37 @@ This document describes App::Subcmd version 0.003_01
 
     use App::Subcmd;
 
-    my %commands = (
-        'start'   => {
-            code => \&log_event,
-            synopsis => 'start {event description}',
-            help => 'Stop last event and start timing a new event.',
+    my %cmds = (
+        start => {
+            code => sub { print "start: @_\n"; },
+            synopsis => 'start [what]',
+            help => 'Start whatever is to be run.',
         },
-        'stop'    => {
-            code => sub { log_event( 'stop' ); },
-            synopsis => 'stop',
-            help => 'Stop timing last event.',
+        stop => {
+            code => sub { print "stop @_\n"; },
+            synopsis => 'stop [what]',
+            help => 'Stop whatever is to be run.',
         },
-        'push'    => {
-            code => \&push_event,
-            synopsis => 'push {event description}',
-            help => 'Save last event on stack and start timing new event.',
+        stuff => {
+            code => sub { print "stuff: @_\n"; },
+            synopsis => 'stuff [what]',
+            help => 'Stuff to do.',
         },
-        'pop'     => {
-            code => \&pop_event,
-            synopsis => 'pop',
-            help => 'Stop last event and restart top event on stack.',
-        },
-        'drop'    => {
-            code => \&drop_event,
-            synopsis => 'drop [all|{n}]',
-            help => 'Drop one or more items from top of event stack or all if argument supplied.',
-        },
-        'nip'    => {
-            code => \&nip_event,
-            synopsis => 'nip',
-            help => 'Drop one item from under the top of event stack.',
-        },
-        'ls'      => {
-            code => \&list_events,
-            synopsis => 'ls [date]',
-            help => 'List events for the specified day. Default to today.',
-        },
-        'lsproj'  => {
-            code => \&list_projects,
-            synopsis => 'lsproj',
-            help => 'List known projects.',
-        },
-        'lstk'    => {
-            code => \&list_stack,
-            synopsis => 'lstk',
-            help => 'Display items on the stack.',
-        },
-        'edit'    => {
-            code => sub { system $config{'editor'}, $config{'logfile'}; },
-            synopsis => 'edit',
-            help => 'Open the timelog file in the current editor',
-        },
-        'help'    => {
-            code => \&usage,
-            synopsis => 'help [commands|aliases]',
-            help => 'A list of commands and/or aliases. Limit display with the argument.',
-        },
-        'report'  => {
-            code => \&daily_report,
-            synopsis => 'report [date [end date]]',
-            help => 'Display a report for the specified days.',
-        },
-        'summary' => {
-            code => \&daily_summary,
-            synopsis => 'summary [date [end date]]',
-            help => q{Display a summary of the appropriate days' projects.},
-        },
-        'hours' => {
-            code => \&report_hours,
-            synopsis => 'hours [date [end date]]',
-            help => q{Display the hours worked for each of the appropriate days.},
+        jump => {
+            code => sub { print "jump: @_\n"; },
+            synopsis => 'jump [what]',
+            help => 'Start whatever is to be run.',
         },
     );
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-  
-  
+    my $processor = App::Subcmd->new( \%cmds );
+    $processor->run( @ARGV );
+
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
-
+This class handles command processing for a script based on a command
+description consisting of a hash containing the name of each command
+mapped to a hash giving code and help information.
 
 =head1 INTERFACE 
 
@@ -307,74 +272,21 @@ This document describes App::Subcmd version 0.003_01
 
 =head2 shell 
 
-=head1 DIAGNOSTICS
-
-=for author to fill in:
-    List every single error and warning message that the module can
-    generate (even the ones that will "never happen"), with a full
-    explanation of each problem, one or more likely causes, and any
-    suggested remedies.
-
-=over
-
-=item C<< Error message here, perhaps with %s placeholders >>
-
-[Description of error here]
-
-=item C<< Another error message here >>
-
-[Description of error here]
-
-[Et cetera, et cetera]
-
-=back
-
-
 =head1 CONFIGURATION AND ENVIRONMENT
 
-=for author to fill in:
-    A full explanation of any configuration system(s) used by the
-    module, including the names and locations of any configuration
-    files, and the meaning of any environment variables or properties
-    that can be set. These descriptions must also include details of any
-    configuration language used.
-  
-App::Subcmd requires no configuration files or environment variables.
-
+App::Subcmd can read a configuration file specified in a Config::Tiny supported
+format. Should be specified in the config parameter.
 
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
-None.
-
+Config::Tiny
+Term::Readline
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
 None reported.
 
-
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
@@ -386,7 +298,6 @@ L<http://rt.cpan.org>.
 =head1 AUTHOR
 
 G. Wade Johnson  C<< <wade@cpan.org> >>
-
 
 =head1 LICENCE AND COPYRIGHT
 
