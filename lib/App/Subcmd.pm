@@ -28,20 +28,20 @@ sub new
     $self->_initialize_config( $config_file ) if defined $config_file and -f $config_file;
 
     # Set defaults with closures that reference this object
-    $self->{cmds}->{man}     = {
-        code => sub { return $self->man( @_ ); },
+    $self->{cmds}->{man} = {
+        code     => sub { return $self->man( @_ ); },
         synopsis => 'man [command|alias]',
         help => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $self->{cmds}->{help} = {
-        code => sub { return $self->help( @_ ); },
+        code     => sub { return $self->help( @_ ); },
         synopsis => 'help [command|alias]',
         help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
-    $self->{cmds}->{shell}    = {
-        code => sub { return $self->shell( @_ ); },
+    $self->{cmds}->{shell} = {
+        code     => sub { return $self->shell( @_ ); },
         synopsis => 'shell',
-        help => 'Execute commands as entered until quit.',
+        help     => 'Execute commands as entered until quit.',
     };
 
     $self->_ensure_valid_command_description( $commands );
@@ -49,24 +49,33 @@ sub new
     return $self;
 }
 
+sub set_in_out
+{
+    my ( $self, $in, $out ) = @_;
+    $self->{readfh}  = $in  if defined $in;
+    $self->{writefh} = $out if defined $out;
+    return;
+}
+
 sub run
 {
     my ( $self, $cmd, @args ) = @_;
 
-    if ( !defined $cmd ) {
+    if( !defined $cmd )
+    {
         $self->_print( "Missing command\n\n" );
         $self->help();
         return;
     }
 
     # Handle alias if one is supplied
-    if ( exists $self->{'alias'}->{$cmd} )
+    if( exists $self->{'alias'}->{$cmd} )
     {
         ( $cmd, @args ) = ( ( split / /, $self->{'alias'}->{$cmd} ), @args );
     }
 
     # Handle builtin commands
-    if ( $self->{cmds}->{$cmd} )
+    if( $self->{cmds}->{$cmd} )
     {
         $self->{cmds}->{$cmd}->{'code'}->( @args );
     }
@@ -80,20 +89,20 @@ sub run
 
 sub _command_list
 {
-    my ($self) = @_;
-    return (sort grep { $_ ne 'man' && $_ ne 'help' } keys %{$self->{cmds}}), qw/help man/;
+    my ( $self ) = @_;
+    return ( sort grep { $_ ne 'man' && $_ ne 'help' } keys %{ $self->{cmds} } ), qw/help man/;
 }
 
 sub _synopsis_string
 {
-    my ($self, $cmd) = @_;
+    my ( $self, $cmd ) = @_;
     return '' if !defined $cmd || !$self->{cmds}->{$cmd};
     return $self->{cmds}->{$cmd}->{synopsis};
 }
 
 sub _help_string
 {
-    my ($self, $cmd) = @_;
+    my ( $self, $cmd ) = @_;
     my $indent = '        ';
     return '' if !defined $cmd || !$self->{cmds}->{$cmd};
     return join( "\n", map { "$indent$_" } split /\n/, $self->{cmds}->{$cmd}->{help} );
@@ -101,7 +110,7 @@ sub _help_string
 
 sub _list_command_man
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->_command_list() )
     {
@@ -112,7 +121,7 @@ sub _list_command_man
 
 sub _list_command
 {
-    my ($self, $code) = @_;
+    my ( $self, $code ) = @_;
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->_command_list() )
     {
@@ -158,18 +167,35 @@ sub man
 
     if( !$arg )
     {
-        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n"; } );
+        $self->_list_command(
+            sub {
+                '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+            }
+        );
         $self->_list_aliases();
         return;
     }
 
     if( $self->{cmds}->{$arg} )
     {
-        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n", ($self->_help_string( $arg ) || "        Sorry, '$arg' does not currently have any help information"), "\n" );
+        $self->_print(
+            "\n",
+            $self->_synopsis_string( $arg ),
+            "\n",
+            (
+                $self->_help_string( $arg )
+                    || "        Sorry, '$arg' does not currently have any help information"
+            ),
+            "\n"
+        );
     }
     elsif( $arg eq 'commands' )
     {
-        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n"; } );
+        $self->_list_command(
+            sub {
+                '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+            }
+        );
     }
     elsif( $arg eq 'aliases' )
     {
@@ -177,7 +203,7 @@ sub man
     }
     else
     {
-         $self->_print( "Unrecognized command '$arg'\n" );
+        $self->_print( "Unrecognized command '$arg'\n" );
     }
 
     return;
@@ -220,7 +246,7 @@ sub _ensure_valid_command_description
         die "Command '$key' has no handler.\n" unless ref $val->{code} eq 'CODE';
         my $desc = { %{$val} };
         $desc->{synopsis} = $key unless defined $desc->{synopsis};
-        $desc->{help} = '' unless defined $desc->{synopsis};
+        $desc->{help}     = ''   unless defined $desc->{synopsis};
         $self->{cmds}->{$key} = $desc;
     }
 
@@ -231,11 +257,11 @@ sub _initialize_config
 {
     my ( $self, $config_file ) = @_;
     my $conf = Config::Tiny->read( $config_file );
-    %{$self->{alias}} = %{delete $conf->{alias}};
-    %{$self->{config}} = (
-        ($conf->{_} ? %{delete $conf->{_}} : ()),   # first extract the top level
-        %{$conf},                                   # Keep any multi-levels that are not aliases
-        %{$self->{config}},                         # Override with supplied parameters
+    %{ $self->{alias} }  = %{ delete $conf->{alias} };
+    %{ $self->{config} } = (
+        ( $conf->{_} ? %{ delete $conf->{_} } : () ),    # first extract the top level
+        %{$conf},                # Keep any multi-levels that are not aliases
+        %{ $self->{config} },    # Override with supplied parameters
     );
     return;
 }
@@ -314,7 +340,9 @@ mapped to a hash giving code and help information.
 
 =head2 man
 
-=head2 shell 
+=head2 shell
+
+=head2 set_in_out
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
