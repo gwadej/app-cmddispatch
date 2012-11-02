@@ -28,14 +28,14 @@ sub new
     $self->_initialize_config( $config_file ) if defined $config_file and -f $config_file;
 
     # Set defaults with closures that reference this object
-    $self->{cmds}->{help}     = {
+    $self->{cmds}->{man}     = {
+        code => sub { return $self->man( @_ ); },
+        synopsis => 'man [command|alias]',
+        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+    };
+    $self->{cmds}->{help} = {
         code => sub { return $self->help( @_ ); },
         synopsis => 'help [command|alias]',
-        help => 'Display help about commands and/or aliases. Limit display with the argument.',
-    };
-    $self->{cmds}->{synopsis} = {
-        code => sub { return $self->synopsis( @_ ); },
-        synopsis => 'synopsis [command|alias]',
         help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     $self->{cmds}->{shell}    = {
@@ -73,7 +73,7 @@ sub run
     else
     {
         $self->_print( "Unrecognized command '$cmd'\n\n" );
-        $self->synopsis();
+        $self->help();
     }
     return;
 }
@@ -81,51 +81,43 @@ sub run
 sub _command_list
 {
     my ($self) = @_;
-    return (sort grep { $_ ne 'help' && $_ ne 'synopsis' } keys %{$self->{cmds}}), qw/synopsis help/;
+    return (sort grep { $_ ne 'man' && $_ ne 'help' } keys %{$self->{cmds}}), qw/help man/;
 }
 
 sub _synopsis_string
 {
     my ($self, $cmd) = @_;
     return '' if !defined $cmd || !$self->{cmds}->{$cmd};
-    return $self->{cmds}->{$cmd}->{synopsis} || $cmd;
+    return $self->{cmds}->{$cmd}->{synopsis};
 }
 
 sub _help_string
 {
     my ($self, $cmd) = @_;
-    return '' if !defined $cmd || !$self->{cmds}->{$cmd}->{help};
-    return "        $self->{cmds}->{$cmd}->{help}";
+    my $indent = '        ';
+    return '' if !defined $cmd || !$self->{cmds}->{$cmd};
+    return join( "\n", map { "$indent$_" } split /\n/, $self->{cmds}->{$cmd}->{help} );
 }
 
-sub synopsis
+sub _list_command_man
 {
-    my ( $self, $arg ) = @_;
-
-    if ( defined $arg && $self->{cmds}->{$arg} )
+    my ($self) = @_;
+    $self->_print( "\nCommands:\n" );
+    foreach my $c ( $self->_command_list() )
     {
-        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
-        return;
+        $self->_print( $self->_synopsis_string( $c ), "\n", $self->_help_string( $c ), "\n" );
     }
+    return;
+}
 
-    if ( !$arg or $arg eq 'commands' )
+sub _list_command
+{
+    my ($self, $code) = @_;
+    $self->_print( "\nCommands:\n" );
+    foreach my $c ( $self->_command_list() )
     {
-        $self->_print( "\nCommands:\n" );
-        foreach my $c ( $self->_command_list() )
-        {
-            $self->_print( $self->_synopsis_string( $c ), "\n" );
-        }
+        $self->_print( $code->( $c ) );
     }
-    if ( !$arg or $arg eq 'aliases' )
-    {
-        $self->_list_aliases();
-    }
-
-    if ($arg && !exists $self->{cmds}->{$arg})
-    {
-         $self->_print( "Unrecognized command '$arg'\n" );
-    }
-
     return;
 }
 
@@ -133,26 +125,57 @@ sub help
 {
     my ( $self, $arg ) = @_;
 
-    if ( defined $arg && $self->{cmds}->{$arg} )
+    if( !$arg )
     {
-        $self->_print( "\n", $self->_cmd_synopsis(), $self->_synopsis_string( $arg ), "\n", ($self->_help_string( $arg ) || "        Sorry, '$arg' does not currently have any help information"), "\n" );
+        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n"; } );
+        $self->_list_aliases();
         return;
     }
 
-    if ( !$arg or $arg eq 'commands' )
+    if( $self->{cmds}->{$arg} )
     {
-        $self->_print( "\nCommands:\n" );
-        foreach my $c ( $self->_command_list() )
-        {
-            $self->_print( $self->_synopsis_string( $c ), "\n   ", $self->_help_string( $c ), "\n" );
-        }
+        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
     }
-    if ( !$arg or $arg eq 'aliases' )
+    elsif( $arg eq 'commands' )
+    {
+        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n"; } );
+    }
+    elsif( $arg eq 'aliases' )
     {
         $self->_list_aliases();
     }
+    else
+    {
+        $self->_print( "Unrecognized command '$arg'\n" );
+    }
 
-    if ($arg && !exists $self->{cmds}->{$arg}) 
+    return;
+}
+
+sub man
+{
+    my ( $self, $arg ) = @_;
+
+    if( !$arg )
+    {
+        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n"; } );
+        $self->_list_aliases();
+        return;
+    }
+
+    if( $self->{cmds}->{$arg} )
+    {
+        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n", ($self->_help_string( $arg ) || "        Sorry, '$arg' does not currently have any help information"), "\n" );
+    }
+    elsif( $arg eq 'commands' )
+    {
+        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n"; } );
+    }
+    elsif( $arg eq 'aliases' )
+    {
+        $self->_list_aliases();
+    }
+    else
     {
          $self->_print( "Unrecognized command '$arg'\n" );
     }
@@ -168,7 +191,7 @@ sub _list_aliases
     $self->_print( "\nAliases:\n" );
     foreach my $c ( sort keys %{ $self->{'alias'} } )
     {
-        $self->_print( "$c\t: $self->{'alias'}->{$c}\n" );
+        $self->_print( "  $c\t: $self->{'alias'}->{$c}\n" );
     }
     return;
 }
@@ -194,7 +217,11 @@ sub _ensure_valid_command_description
     while ( my ( $key, $val ) = each %{$cmds} )
     {
         die "Command '$key' is an invalid descriptor.\n" unless ref $val eq ref {};
-        $self->{cmds}->{$key} = { %{$val} };
+        die "Command '$key' has no handler.\n" unless ref $val->{code} eq 'CODE';
+        my $desc = { %{$val} };
+        $desc->{synopsis} = $key unless defined $desc->{synopsis};
+        $desc->{help} = '' unless defined $desc->{synopsis};
+        $self->{cmds}->{$key} = $desc;
     }
 
     return;
@@ -283,9 +310,9 @@ mapped to a hash giving code and help information.
 
 =head2 run
 
-=head2 synopsis
-
 =head2 help
+
+=head2 man
 
 =head2 shell 
 
