@@ -28,23 +28,6 @@ sub new
 
     $self->_initialize_config( $config_file ) if defined $config_file and -f $config_file;
 
-    # Set defaults with closures that reference this object
-    $self->{cmds}->{man} = {
-        code     => sub { return $self->man( @_ ); },
-        synopsis => 'man [command|alias]',
-        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
-    };
-    $self->{cmds}->{help} = {
-        code     => sub { return $self->help( @_ ); },
-        synopsis => 'help [command|alias]',
-        help => 'A list of commands and/or aliases. Limit display with the argument.',
-    };
-    $self->{cmds}->{shell} = {
-        code     => sub { return $self->shell( @_ ); },
-        synopsis => 'shell',
-        help     => 'Execute commands as entered until quit.',
-    };
-
     $self->_ensure_valid_command_description( $commands );
 
     return $self;
@@ -111,17 +94,6 @@ sub _help_string
     return join( "\n", map { "$indent$_" } split /\n/, $self->{cmds}->{$cmd}->{help} );
 }
 
-sub _list_command_man
-{
-    my ( $self ) = @_;
-    $self->_print( "\nCommands:\n" );
-    foreach my $c ( $self->_command_list() )
-    {
-        $self->_print( $self->_synopsis_string( $c ), "\n", $self->_help_string( $c ), "\n" );
-    }
-    return;
-}
-
 sub _list_command
 {
     my ( $self, $code ) = @_;
@@ -137,7 +109,7 @@ sub help
 {
     my ( $self, $arg ) = @_;
 
-    if( !$arg )
+    if( !defined $arg or $arg eq '' )
     {
         $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n"; } );
         $self->_list_aliases();
@@ -168,7 +140,7 @@ sub man
 {
     my ( $self, $arg ) = @_;
 
-    if( !$arg )
+    if( !defined $arg or $arg eq '' )
     {
         $self->_list_command(
             sub {
@@ -243,13 +215,37 @@ sub _ensure_valid_command_description
 {
     my ( $self, $cmds ) = @_;
 
+    # Set defaults with closures that reference this object
+    $self->{cmds}->{man} = {
+        code     => sub { return $self->man( @_ ); },
+        synopsis => 'man [command|alias]',
+        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+    };
+    $self->{cmds}->{help} = {
+        code     => sub { return $self->help( @_ ); },
+        synopsis => 'help [command|alias]',
+        help => 'A list of commands and/or aliases. Limit display with the argument.',
+    };
+    $self->{cmds}->{shell} = {
+        code     => sub { return $self->shell( @_ ); },
+        synopsis => 'shell',
+        help     => 'Execute commands as entered until quit.',
+    };
+
+    # Override defaults with supplied commands.
     while ( my ( $key, $val ) = each %{$cmds} )
     {
+        if( !defined $val )
+        {
+            delete $self->{cmds}->{$key};
+            next;
+        }
         die "Command '$key' is an invalid descriptor.\n" unless ref $val eq ref {};
         die "Command '$key' has no handler.\n" unless ref $val->{code} eq 'CODE';
+
         my $desc = { %{$val} };
         $desc->{synopsis} = $key unless defined $desc->{synopsis};
-        $desc->{help}     = ''   unless defined $desc->{synopsis};
+        $desc->{help}     = ''   unless defined $desc->{help};
         $self->{cmds}->{$key} = $desc;
     }
 
