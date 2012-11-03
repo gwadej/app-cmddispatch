@@ -12,6 +12,7 @@ sub new
     my ( $class, $commands, $options ) = @_;
     $options ||= {};
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
+    die "No commands specified.\n"               unless keys %{$commands};
     die "Options parameter is not a hashref.\n"  unless ref $options  eq ref {};
 
     my %config      = %{$options};

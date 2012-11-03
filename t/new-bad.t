@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Test::Exception;
 
 use strict;
@@ -10,7 +10,8 @@ use App::Subcmd;
 
 throws_ok { App::Subcmd->new }          qr/Command definition is not a hashref/, 'No args';
 throws_ok { App::Subcmd->new( 'foo' ) } qr/Command definition is not a hashref/, 'Non-hashref arg';
-throws_ok { App::Subcmd->new( {}, 'foo' ) } qr/Options .* not a hashref/, 'Non-hashref options';
+throws_ok { App::Subcmd->new( {} ) } qr/No commands specified/, 'Empty command hash';
+throws_ok { App::Subcmd->new( { noop => { code => sub {} } }, 'foo' ) } qr/Options .* not a hashref/, 'Non-hashref options';
 
 # Bad commands
 throws_ok { App::Subcmd->new( { foo => 'aa' } ) }
