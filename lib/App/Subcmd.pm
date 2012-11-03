@@ -57,6 +57,8 @@ sub set_in_out
     return;
 }
 
+sub get_config { return $_[0]->{config}; }
+
 sub run
 {
     my ( $self, $cmd, @args ) = @_;
@@ -343,6 +345,8 @@ mapped to a hash giving code and help information.
 =head2 shell
 
 =head2 set_in_out
+
+=head2 get_config
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
