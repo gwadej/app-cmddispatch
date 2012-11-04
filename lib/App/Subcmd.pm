@@ -50,9 +50,9 @@ sub run
 {
     my ( $self, $cmd, @args ) = @_;
 
-    if( !defined $cmd )
+    if( _is_missing( $cmd ) )
     {
-        $self->_print( "Missing command\n\n" );
+        $self->_print( "Missing command\n" );
         $self->help();
         return;
     }
@@ -70,7 +70,7 @@ sub run
     }
     else
     {
-        $self->_print( "Unrecognized command '$cmd'\n\n" );
+        $self->_print( "Unrecognized command '$cmd'\n" );
         $self->help();
     }
     return;
@@ -85,14 +85,12 @@ sub _command_list
 sub _synopsis_string
 {
     my ( $self, $cmd ) = @_;
-    return '' if !defined $cmd || !$self->{cmds}->{$cmd};
     return $self->{cmds}->{$cmd}->{synopsis};
 }
 
 sub _help_string
 {
     my ( $self, $cmd ) = @_;
-    return '' if !defined $cmd || !$self->{cmds}->{$cmd};
     return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{help} );
 }
 
@@ -102,6 +100,7 @@ sub _list_command
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->_command_list() )
     {
+        next if $c eq '' or !$self->{cmds}->{$c};
         $self->_print( $code->( $c ) );
     }
     return;
@@ -111,7 +110,7 @@ sub help
 {
     my ( $self, $arg ) = @_;
 
-    if( !defined $arg or $arg eq '' )
+    if( _is_missing( $arg ) )
     {
         $self->_list_command( sub { $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n"; } );
         $self->_list_aliases();
@@ -142,7 +141,7 @@ sub man
 {
     my ( $self, $arg ) = @_;
 
-    if( !defined $arg or $arg eq '' )
+    if( _is_missing( $arg ) )
     {
         $self->_list_command(
             sub {
@@ -281,6 +280,8 @@ sub _prompt
     print { $self->{writefh} } @_;
     return readline( $self->{readfh} );
 }
+
+sub _is_missing { return !defined $_[0] || $_[0] eq ''; }
 
 1;
 
