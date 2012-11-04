@@ -7,6 +7,9 @@ use Term::ReadLine;
 
 our $VERSION = '0.003_01';
 
+my $CMD_INDENT  = '  ';
+my $HELP_INDENT = '        ';
+
 sub new
 {
     my ( $class, $commands, $options ) = @_;
@@ -76,7 +79,7 @@ sub run
 sub _command_list
 {
     my ( $self ) = @_;
-    return ( sort grep { $_ ne 'man' && $_ ne 'help' } keys %{ $self->{cmds} } ), qw/help man/;
+    return ( sort grep { $_ ne 'man' && $_ ne 'help' } keys %{ $self->{cmds} } ), grep { $self->{cmds}->{$_} } qw/help man/;
 }
 
 sub _synopsis_string
@@ -89,9 +92,8 @@ sub _synopsis_string
 sub _help_string
 {
     my ( $self, $cmd ) = @_;
-    my $indent = '        ';
     return '' if !defined $cmd || !$self->{cmds}->{$cmd};
-    return join( "\n", map { "$indent$_" } split /\n/, $self->{cmds}->{$cmd}->{help} );
+    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{help} );
 }
 
 sub _list_command
@@ -111,7 +113,7 @@ sub help
 
     if( !defined $arg or $arg eq '' )
     {
-        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n"; } );
         $self->_list_aliases();
         return;
     }
@@ -122,7 +124,7 @@ sub help
     }
     elsif( $arg eq 'commands' )
     {
-        $self->_list_command( sub { '  ', $self->_synopsis_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n"; } );
     }
     elsif( $arg eq 'aliases' )
     {
@@ -144,7 +146,7 @@ sub man
     {
         $self->_list_command(
             sub {
-                '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
             }
         );
         $self->_list_aliases();
@@ -159,7 +161,7 @@ sub man
             "\n",
             (
                 $self->_help_string( $arg )
-                    || "        Sorry, '$arg' does not currently have any help information"
+                    || $HELP_INDENT . "No help for '$arg'"
             ),
             "\n"
         );
@@ -168,7 +170,7 @@ sub man
     {
         $self->_list_command(
             sub {
-                '  ', $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
             }
         );
     }
@@ -192,7 +194,7 @@ sub _list_aliases
     $self->_print( "\nAliases:\n" );
     foreach my $c ( sort keys %{ $self->{'alias'} } )
     {
-        $self->_print( "  $c\t: $self->{'alias'}->{$c}\n" );
+        $self->_print( "$CMD_INDENT$c\t: $self->{'alias'}->{$c}\n" );
     }
     return;
 }
@@ -235,6 +237,7 @@ sub _ensure_valid_command_description
     # Override defaults with supplied commands.
     while ( my ( $key, $val ) = each %{$cmds} )
     {
+        next if $key eq '';
         if( !defined $val )
         {
             delete $self->{cmds}->{$key};

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More 'no_plan'; #tests => 1;
+use Test::More tests => 19;
 
 use strict;
 use warnings;
@@ -131,3 +131,103 @@ Commands:
 EOF
 }
 
+{
+    my $label = 'Single command, remove shell';
+    my $app = App::Subcmd->new(
+        {
+            noop => { code => sub {} },
+            shell => undef,
+        }
+    );
+
+    # Using private method for testing.
+    is_deeply [ $app->_command_list() ], [qw/noop help man/], "$label: shell has been removed";
+
+    my $output;
+    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
+    $app->set_in_out( undef, $fh );
+    $app->help;
+    is $output, <<EOF, "$label: shell removed from help";
+
+Commands:
+  noop
+  help [command|alias]
+  man [command|alias]
+EOF
+
+    $output = '';
+    $app->man;
+    is $output, <<EOF, "$label: Default man supplied";
+
+Commands:
+  noop
+
+  help [command|alias]
+        A list of commands and/or aliases. Limit display with the argument.
+  man [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+EOF
+}
+
+{
+    my $label = 'Single command, remove help';
+    my $app = App::Subcmd->new(
+        {
+            noop => { code => sub {} },
+            help => undef,
+        }
+    );
+
+    # Using private method for testing.
+    is_deeply [ $app->_command_list() ], [qw/noop shell man/], "$label: help has been removed";
+}
+
+{
+    my $label = 'Single command, remove man';
+    my $app = App::Subcmd->new(
+        {
+            noop => { code => sub {} },
+            man => undef,
+        }
+    );
+
+    # Using private method for testing.
+    is_deeply [ $app->_command_list() ], [qw/noop shell help/], "$label: man has been removed";
+}
+
+{
+    my $label = 'Replace help';
+    my $called = 0;
+    my $app = App::Subcmd->new(
+        {
+            noop => { code => sub {} },
+            help => { code => sub { ++$called; }, synopsis => 'help', help => 'Replaced help' },
+        }
+    );
+
+    # Using private method for testing.
+    is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: man has been removed";
+
+    is( $called, 0, "$label: No calls made" );
+    $app->run( 'help' );
+    is( $called, 1, "$label: Replacement code is called" );
+
+    my $output;
+    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
+    $app->set_in_out( undef, $fh );
+    $app->man;
+    is $output, <<EOF, "$label: help strings replaced";
+
+Commands:
+  noop
+
+  shell
+        Execute commands as entered until quit.
+  help
+        Replaced help
+  man [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+EOF
+}
