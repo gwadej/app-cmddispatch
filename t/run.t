@@ -5,6 +5,10 @@ use Test::More 'no_plan'; #tests => 1;
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use Test::Subcmd 'output_is';
+
 use App::Subcmd;
 
 {
@@ -13,32 +17,8 @@ use App::Subcmd;
             noop => { code => sub {} },
         }
     );
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->run();
-    is $output, <<EOF, "Running with no command gives error.\n";
-Missing command
 
-Commands:
-  noop
-  shell
-  help [command|alias]
-  man [command|alias]
-EOF
-}
-
-{
-    my $app = App::Subcmd->new(
-        {
-            noop => { code => sub {} },
-        }
-    );
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->run( '' );
-    is $output, <<EOF, "Running with empty command gives error.\n";
+    output_is( $app, sub { $app->run(); }, <<EOF, "Running with no command gives error.\n" );
 Missing command
 
 Commands:
@@ -56,11 +36,8 @@ EOF
         }
     );
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->run( 'help' );
-    is $output, <<EOF, "Help command run successfully";
+    output_is( $app, sub { $app->run( '' ); }, <<EOF, "Running with empty command gives error.\n" );
+Missing command
 
 Commands:
   noop
@@ -77,11 +54,24 @@ EOF
         }
     );
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->run( 'foo' );
-    is $output, <<EOF, "Unrecognized command gives error";
+    output_is( $app, sub { $app->run( 'help' ); }, <<EOF, "Help command run successfully" );
+
+Commands:
+  noop
+  shell
+  help [command|alias]
+  man [command|alias]
+EOF
+}
+
+{
+    my $app = App::Subcmd->new(
+        {
+            noop => { code => sub {} },
+        }
+    );
+
+    output_is( $app, sub { $app->run( 'foo' ); }, <<EOF, "Unrecognized command gives error" );
 Unrecognized command 'foo'
 
 Commands:
