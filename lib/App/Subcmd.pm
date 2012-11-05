@@ -5,7 +5,7 @@ use strict;
 use Config::Tiny;
 use Term::ReadLine;
 
-our $VERSION = '0.003_01';
+our $VERSION = '0.003_02';
 
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
