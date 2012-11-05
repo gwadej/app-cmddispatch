@@ -5,6 +5,10 @@ use Test::More tests => 19;
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use Test::Subcmd 'output_is';
+
 use App::Subcmd;
 
 {
@@ -19,11 +23,7 @@ use App::Subcmd;
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: noop help and man found";
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: Default help supplied";
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
@@ -32,9 +32,7 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->man;
-    is $output, <<EOF, "$label: Default man supplied";
+    output_is( $app, sub { $app->man }, <<EOF, "$label: Default man supplied" );
 
 Commands:
   noop
@@ -60,11 +58,7 @@ EOF
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: noop help and man found";
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: Help as supplied";
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
@@ -73,9 +67,7 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->man;
-    is $output, <<EOF, "$label: Default man supplied";
+    output_is( $app, sub { $app->man; }, <<EOF, "$label: Default man supplied" );
 
 Commands:
   noop [n]
@@ -101,11 +93,7 @@ EOF
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: noop help and man found";
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: Help as supplied";
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
@@ -114,9 +102,7 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->man;
-    is $output, <<EOF, "$label: Default man supplied";
+    output_is( $app, sub { $app->man; }, <<EOF, "$label: Default man supplied" );
 
 Commands:
   noop [n]
@@ -143,11 +129,7 @@ EOF
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop help man/], "$label: shell has been removed";
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: shell removed from help";
+    output_is( $app, sub { $app->help; }, <<EOF, "$label: shell removed from help" );
 
 Commands:
   noop
@@ -155,9 +137,7 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->man;
-    is $output, <<EOF, "$label: Default man supplied";
+    output_is( $app, sub { $app->man; }, <<EOF, "$label: Default man supplied" );
 
 Commands:
   noop
@@ -213,11 +193,7 @@ EOF
     $app->run( 'help' );
     is( $called, 1, "$label: Replacement code is called" );
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->man;
-    is $output, <<EOF, "$label: help strings replaced";
+    output_is( $app, sub { $app->man; }, <<EOF, "$label: help strings replaced" );
 
 Commands:
   noop
