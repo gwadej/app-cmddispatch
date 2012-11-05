@@ -206,6 +206,7 @@ sub shell
     while ( my $line = $self->_prompt( '> ' ) )
     {
         chomp $line;
+        next unless $line =~ /\S/;
         last if $line eq 'quit';
         $self->run( split /\s+/, $line );
     }

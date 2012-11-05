@@ -5,7 +5,12 @@ use Test::More tests => 10;
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use Test::Subcmd 'output_is';
+
 use App::Subcmd;
+
 
 {
     my $label = 'Single command, handler only';
@@ -15,11 +20,7 @@ use App::Subcmd;
         }
     );
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: Default help supplied";
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
@@ -37,11 +38,7 @@ EOF
         }
     );
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: Help as supplied";
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
@@ -59,11 +56,7 @@ EOF
         }
     );
 
-    my $output;
-    open my $fh, '>>', \$output or die "Unable to open handle to buffer.\n";
-    $app->set_in_out( undef, $fh );
-    $app->help;
-    is $output, <<EOF, "$label: Help as supplied";
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
@@ -72,9 +65,7 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->help( undef );
-    is $output, <<EOF, "$label: undef supplied to help";
+    output_is( $app, sub { $app->help( undef ) }, <<EOF, "$label: undef supplied to help" );
 
 Commands:
   noop [n]
@@ -83,9 +74,7 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->help( '' );
-    is $output, <<EOF, "$label: empty string supplied to help";
+    output_is( $app, sub { $app->help( '' ) }, <<EOF, "$label: empty string supplied to help" );
 
 Commands:
   noop [n]
@@ -94,27 +83,19 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->help( 0 );
-    is $output, "Unrecognized command '0'\n", "$label: zero supplied to help";
+    output_is( $app, sub { $app->help( 0 ) }, "Unrecognized command '0'\n", "$label: zero supplied to help" );
 
-    $output = '';
-    $app->help( 'noop' );
-    is $output, <<EOF, "$label: command supplied to help";
+    output_is( $app, sub { $app->help( 'noop' ) }, <<EOF, "$label: command supplied to help" );
 
 noop [n]
 EOF
 
-    $output = '';
-    $app->help( 'help' );
-    is $output, <<EOF, "$label: help supplied to help";
+    output_is( $app, sub { $app->help( 'help' ) }, <<EOF, "$label: help supplied to help" );
 
 help [command|alias]
 EOF
 
-    $output = '';
-    $app->help( 'commands' );
-    is $output, <<EOF, "$label: 'commands' supplied to help";
+    output_is( $app, sub { $app->help( 'commands' ) }, <<EOF, "$label: 'commands' supplied to help" );
 
 Commands:
   noop [n]
@@ -123,7 +104,5 @@ Commands:
   man [command|alias]
 EOF
 
-    $output = '';
-    $app->help( 'aliases' );
-    is $output, '', "$label: 'aliases' supplied to help, with no aliases";
+    output_is( $app, sub { $app->help( 'aliases' ) }, undef, "$label: 'aliases' supplied to help, with no aliases" );
 }
