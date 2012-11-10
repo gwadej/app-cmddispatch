@@ -53,7 +53,7 @@ sub run
     if( _is_missing( $cmd ) )
     {
         $self->_print( "Missing command\n" );
-        $self->help();
+        $self->synopsis();
         return;
     }
 
@@ -71,7 +71,7 @@ sub run
     else
     {
         $self->_print( "Unrecognized command '$cmd'\n" );
-        $self->help();
+        $self->synopsis();
     }
     return;
 }
@@ -79,7 +79,7 @@ sub run
 sub _command_list
 {
     my ( $self ) = @_;
-    return ( sort grep { $_ ne 'man' && $_ ne 'help' } keys %{ $self->{cmds} } ), grep { $self->{cmds}->{$_} } qw/help man/;
+    return ( sort grep { $_ ne 'help' && $_ ne 'synopsis' } keys %{ $self->{cmds} } ), grep { $self->{cmds}->{$_} } qw/synopsis help/;
 }
 
 sub _synopsis_string
@@ -91,7 +91,7 @@ sub _synopsis_string
 sub _help_string
 {
     my ( $self, $cmd ) = @_;
-    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{help} );
+    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{synopsis} );
 }
 
 sub _list_command
@@ -106,7 +106,7 @@ sub _list_command
     return;
 }
 
-sub help
+sub synopsis
 {
     my ( $self, $arg ) = @_;
 
@@ -137,7 +137,7 @@ sub help
     return;
 }
 
-sub man
+sub help
 {
     my ( $self, $arg ) = @_;
 
@@ -160,7 +160,7 @@ sub man
             "\n",
             (
                 $self->_help_string( $arg )
-                    || $HELP_INDENT . "No help for '$arg'"
+                    || $HELP_INDENT . "No synopsis for '$arg'"
             ),
             "\n"
         );
@@ -218,14 +218,14 @@ sub _ensure_valid_command_description
     my ( $self, $cmds ) = @_;
 
     # Set defaults with closures that reference this object
-    $self->{cmds}->{man} = {
-        code     => sub { return $self->man( @_ ); },
-        synopsis => 'man [command|alias]',
-        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
-    };
     $self->{cmds}->{help} = {
         code     => sub { return $self->help( @_ ); },
         synopsis => 'help [command|alias]',
+        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+    };
+    $self->{cmds}->{synopsis} = {
+        code     => sub { return $self->synopsis( @_ ); },
+        synopsis => 'synopsis [command|alias]',
         help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     $self->{cmds}->{shell} = {
@@ -340,9 +340,9 @@ mapped to a hash giving code and help information.
 
 =head2 run
 
-=head2 help
+=head2 synopsis
 
-=head2 man
+=head2 help
 
 =head2 shell
 
