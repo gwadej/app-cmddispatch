@@ -91,7 +91,7 @@ sub _synopsis_string
 sub _help_string
 {
     my ( $self, $cmd ) = @_;
-    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{synopsis} );
+    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{help} );
 }
 
 sub _list_command

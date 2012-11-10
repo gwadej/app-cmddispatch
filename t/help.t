@@ -19,16 +19,16 @@ use App::Subcmd;
         }
     );
 
-    output_is( $app, sub { $app->man }, <<EOF, "$label: Default man supplied" );
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
 
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
@@ -42,16 +42,16 @@ EOF
         }
     );
 
-    output_is( $app, sub { $app->man }, <<EOF, "$label: Help as supplied" );
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
 
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
@@ -65,76 +65,76 @@ EOF
         }
     );
 
-    output_is( $app, sub { $app->man }, <<EOF, "$label: Default man supplied" );
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Default man supplied" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
 
-    output_is( $app, sub { $app->man( undef ); }, <<EOF, "$label: undef supplied to help" );
+    output_is( $app, sub { $app->help( undef ); }, <<EOF, "$label: undef supplied to synopsis" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
 
-    output_is( $app, sub { $app->man( '' ) }, <<EOF, "$label: empty string supplied to help" );
+    output_is( $app, sub { $app->help( '' ) }, <<EOF, "$label: empty string supplied to synopsis" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
 
-    output_is( $app, sub { $app->help( 0 ); }, "Unrecognized command '0'\n", "$label: zero supplied to help" );
+    output_is( $app, sub { $app->synopsis( 0 ); }, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
 
-    output_is( $app, sub { $app->help( 'noop' ); }, <<EOF, "$label: command supplied to help" );
+    output_is( $app, sub { $app->synopsis( 'noop' ); }, <<EOF, "$label: command supplied to synopsis" );
 
 noop [n]
 EOF
 
-    output_is( $app, sub { $app->man( 'man' ); }, <<EOF, "$label: man supplied to man" );
+    output_is( $app, sub { $app->help( 'help' ); }, <<EOF, "$label: help supplied to help" );
 
-man [command|alias]
+help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
 
-    output_is( $app, sub { $app->man( 'commands' ); }, <<EOF, "$label: 'commands' supplied to man" );
+    output_is( $app, sub { $app->help( 'commands' ); }, <<EOF, "$label: 'commands' supplied to help" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
 
-    output_is( $app, sub { $app->man( 'aliases' ); }, undef, "$label: 'aliases' supplied to man, with no aliases" );
+    output_is( $app, sub { $app->help( 'aliases' ); }, undef, "$label: 'aliases' supplied to help, with no aliases" );
 }
 

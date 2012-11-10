@@ -21,27 +21,27 @@ use App::Subcmd;
     isa_ok( $app, 'App::Subcmd' );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: noop help and man found";
+    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and man found";
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
+    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->man }, <<EOF, "$label: Default man supplied" );
+    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
 
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
@@ -56,27 +56,27 @@ EOF
     );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: noop help and man found";
+    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
+    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Synopsis as supplied" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->man; }, <<EOF, "$label: Default man supplied" );
+    output_is( $app, sub { $app->help; }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop [n]
 
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
@@ -91,27 +91,27 @@ EOF
     );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: noop help and man found";
+    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
+    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->man; }, <<EOF, "$label: Default man supplied" );
+    output_is( $app, sub { $app->help; }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
@@ -127,27 +127,40 @@ EOF
     );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop help man/], "$label: shell has been removed";
+    is_deeply [ $app->_command_list() ], [qw/noop synopsis help/], "$label: shell has been removed";
 
-    output_is( $app, sub { $app->help; }, <<EOF, "$label: shell removed from help" );
+    output_is( $app, sub { $app->synopsis; }, <<EOF, "$label: shell removed from help" );
 
 Commands:
   noop
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->man; }, <<EOF, "$label: Default man supplied" );
+    output_is( $app, sub { $app->help; }, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
 
-  help [command|alias]
+  synopsis [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
-  man [command|alias]
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF
+}
+
+{
+    my $label = 'Single command, remove synopsis';
+    my $app = App::Subcmd->new(
+        {
+            noop => { code => sub {} },
+            synopsis => undef,
+        }
+    );
+
+    # Using private method for testing.
+    is_deeply [ $app->_command_list() ], [qw/noop shell help/], "$label: synopsis has been removed";
 }
 
 {
@@ -160,49 +173,36 @@ EOF
     );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell man/], "$label: help has been removed";
+    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis/], "$label: help has been removed";
 }
 
 {
-    my $label = 'Single command, remove man';
-    my $app = App::Subcmd->new(
-        {
-            noop => { code => sub {} },
-            man => undef,
-        }
-    );
-
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell help/], "$label: man has been removed";
-}
-
-{
-    my $label = 'Replace help';
+    my $label = 'Replace synopsis';
     my $called = 0;
     my $app = App::Subcmd->new(
         {
             noop => { code => sub {} },
-            help => { code => sub { ++$called; }, synopsis => 'help', help => 'Replaced help' },
+            synopsis => { code => sub { ++$called; }, synopsis => 'synopsis', help => 'Replaced synopsis' },
         }
     );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell help man/], "$label: man has been removed";
+    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: synopsis still there";
 
     is( $called, 0, "$label: No calls made" );
-    $app->run( 'help' );
+    $app->run( 'synopsis' );
     is( $called, 1, "$label: Replacement code is called" );
 
-    output_is( $app, sub { $app->man; }, <<EOF, "$label: help strings replaced" );
+    output_is( $app, sub { $app->help; }, <<EOF, "$label: synopsis strings replaced" );
 
 Commands:
   noop
 
   shell
         Execute commands as entered until quit.
-  help
-        Replaced help
-  man [command|alias]
+  synopsis
+        Replaced synopsis
+  help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
 EOF

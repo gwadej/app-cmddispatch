@@ -20,13 +20,13 @@ use App::Subcmd;
         }
     );
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
+    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Default synopsis supplied" );
 
 Commands:
   noop
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 }
 
@@ -38,13 +38,13 @@ EOF
         }
     );
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
+    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 }
 
@@ -56,53 +56,53 @@ EOF
         }
     );
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Help as supplied" );
+    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help( undef ) }, <<EOF, "$label: undef supplied to help" );
+    output_is( $app, sub { $app->synopsis( undef ) }, <<EOF, "$label: undef supplied to synopsis" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help( '' ) }, <<EOF, "$label: empty string supplied to help" );
+    output_is( $app, sub { $app->synopsis( '' ) }, <<EOF, "$label: empty string supplied to synopsis" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help( 0 ) }, "Unrecognized command '0'\n", "$label: zero supplied to help" );
+    output_is( $app, sub { $app->synopsis( 0 ) }, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
 
-    output_is( $app, sub { $app->help( 'noop' ) }, <<EOF, "$label: command supplied to help" );
+    output_is( $app, sub { $app->synopsis( 'noop' ) }, <<EOF, "$label: command supplied to synopsis" );
 
 noop [n]
 EOF
 
-    output_is( $app, sub { $app->help( 'help' ) }, <<EOF, "$label: help supplied to help" );
+    output_is( $app, sub { $app->synopsis( 'synopsis' ) }, <<EOF, "$label: synopsis supplied to synopsis" );
 
-help [command|alias]
+synopsis [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help( 'commands' ) }, <<EOF, "$label: 'commands' supplied to help" );
+    output_is( $app, sub { $app->synopsis( 'commands' ) }, <<EOF, "$label: 'commands' supplied to synopsis" );
 
 Commands:
   noop [n]
   shell
+  synopsis [command|alias]
   help [command|alias]
-  man [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help( 'aliases' ) }, undef, "$label: 'aliases' supplied to help, with no aliases" );
+    output_is( $app, sub { $app->synopsis( 'aliases' ) }, undef, "$label: 'aliases' supplied to synopsis, with no aliases" );
 }
