@@ -299,7 +299,7 @@ App::Subcmd - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::Subcmd version 0.003_01
+This document describes App::Subcmd version 0.003_02
 
 =head1 SYNOPSIS
 
