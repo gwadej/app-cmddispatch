@@ -10,6 +10,9 @@ our $VERSION = '0.003_02';
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
 
+my $SHORT_HELP = 'synopsis';
+my $LONG_HELP  = 'help';
+
 sub new
 {
     my ( $class, $commands, $options ) = @_;
@@ -79,7 +82,7 @@ sub run
 sub _command_list
 {
     my ( $self ) = @_;
-    return ( sort grep { $_ ne 'help' && $_ ne 'synopsis' } keys %{ $self->{cmds} } ), grep { $self->{cmds}->{$_} } qw/synopsis help/;
+    return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } keys %{ $self->{cmds} } ), grep { $self->{cmds}->{$_} } ($SHORT_HELP, $LONG_HELP);
 }
 
 sub _synopsis_string
