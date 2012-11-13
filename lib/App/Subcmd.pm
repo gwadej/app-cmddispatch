@@ -56,7 +56,7 @@ sub run
     if( _is_missing( $cmd ) )
     {
         $self->_print( "Missing command\n" );
-        $self->synopsis();
+        $self->_do_synopsis();
         return;
     }
 
@@ -74,7 +74,7 @@ sub run
     else
     {
         $self->_print( "Unrecognized command '$cmd'\n" );
-        $self->synopsis();
+        $self->_do_synopsis();
     }
     return;
 }
@@ -186,6 +186,13 @@ sub help
     }
 
     return;
+}
+
+sub _do_synopsis
+{
+    my ($self) = @_;
+    return $self->{cmds}->{'synopsis'}->{code}->() if $self->{cmds}->{'synopsis'};
+    return $self->synopsis();
 }
 
 sub _list_aliases
