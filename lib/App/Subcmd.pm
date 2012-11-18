@@ -32,7 +32,11 @@ sub new
         writefh => \*STDOUT,
     }, $class;
 
-    $self->_initialize_config( $config_file ) if defined $config_file and -f $config_file;
+    if( defined $config_file )
+    {
+        die "Supplied config is not a file.\n" unless -f $config_file;
+        $self->_initialize_config( $config_file );
+    }
 
     $self->_ensure_valid_command_description( $commands );
 
