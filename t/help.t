@@ -107,11 +107,12 @@ Commands:
         argument.
 EOF
 
-    output_is( $app, sub { $app->synopsis( 0 ); }, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
+    output_is( $app, sub { $app->help( 0 ); }, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
 
-    output_is( $app, sub { $app->synopsis( 'noop' ); }, <<EOF, "$label: command supplied to synopsis" );
+    output_is( $app, sub { $app->help( 'noop' ); }, <<EOF, "$label: command supplied to synopsis" );
 
 noop [n]
+        Does nothing, n times.
 EOF
 
     output_is( $app, sub { $app->help( 'help' ); }, <<EOF, "$label: help supplied to help" );
