@@ -73,7 +73,7 @@ sub run
     # Handle builtin commands
     if( $self->{cmds}->{$cmd} )
     {
-        $self->{cmds}->{$cmd}->{'code'}->( @args );
+        $self->{cmds}->{$cmd}->{'code'}->( $self, @args );
     }
     else
     {
@@ -195,7 +195,7 @@ sub help
 sub _do_synopsis
 {
     my ($self) = @_;
-    return $self->{cmds}->{'synopsis'}->{code}->() if $self->{cmds}->{'synopsis'};
+    return $self->{cmds}->{'synopsis'}->{code}->( $self ) if $self->{cmds}->{'synopsis'};
     return $self->synopsis();
 }
 
@@ -233,17 +233,17 @@ sub _ensure_valid_command_description
 
     # Set defaults with closures that reference this object
     $self->{cmds}->{help} = {
-        code     => sub { return $self->help( @_ ); },
+        code     => \&App::CmdDispatch::help,
         synopsis => 'help [command|alias]',
         help => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $self->{cmds}->{synopsis} = {
-        code     => sub { return $self->synopsis( @_ ); },
+        code     => \&App::CmdDispatch::synopsis,
         synopsis => 'synopsis [command|alias]',
         help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     $self->{cmds}->{shell} = {
-        code     => sub { return $self->shell( @_ ); },
+        code     => \&App::CmdDispatch::shell,
         synopsis => 'shell',
         help     => 'Execute commands as entered until quit.',
     };
@@ -318,22 +318,22 @@ This document describes App::CmdDispatch version 0.003_02
 
     my %cmds = (
         start => {
-            code => sub { print "start: @_\n"; },
+            code => sub { my $app = shift; print "start: @_\n"; },
             synopsis => 'start [what]',
             help => 'Start whatever is to be run.',
         },
         stop => {
-            code => sub { print "stop @_\n"; },
+            code => sub { my $app = shift; print "stop @_\n"; },
             synopsis => 'stop [what]',
             help => 'Stop whatever is to be run.',
         },
         stuff => {
-            code => sub { print "stuff: @_\n"; },
+            code => sub { my $app = shift; print "stuff: @_\n"; },
             synopsis => 'stuff [what]',
             help => 'Stuff to do.',
         },
         jump => {
-            code => sub { print "jump: @_\n"; },
+            code => sub { my $app = shift; print "jump: @_\n"; },
             synopsis => 'jump [what]',
             help => 'Start whatever is to be run.',
         },
