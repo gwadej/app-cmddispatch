@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 4;
+use Test::More tests => 8;
 
 use strict;
 use warnings;
@@ -101,5 +101,70 @@ EOF
 help [command|alias]
         Display help about commands and/or aliases. Limit display with the
         argument.
+EOF
+}
+
+{
+    my $ft = File::Temp->new( SUFFIX => '.conf' );
+    print {$ft} <<EOF;
+parm1=1771
+parm2=7171
+[alias]
+list=synopsis
+help2=help help
+EOF
+    close $ft;
+
+    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+
+    output_is( $app, sub { $app->run( qw/help commands/ ) }, <<EOF, 'Verify help commands works' );
+
+Commands:
+  noop
+
+  shell
+        Execute commands as entered until quit.
+  synopsis [command|alias]
+        A list of commands and/or aliases. Limit display with the argument.
+  help [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+EOF
+
+    output_is( $app, sub { $app->run( qw/help aliases/ ) }, <<EOF, 'Verify help aliases' );
+
+Aliases:
+  help2\t: help help
+  list\t: synopsis
+EOF
+}
+
+{
+    my $ft = File::Temp->new( SUFFIX => '.conf' );
+    print {$ft} <<EOF;
+parm1=1771
+parm2=7171
+[alias]
+list=synopsis
+help2=help help
+EOF
+    close $ft;
+
+    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+
+    output_is( $app, sub { $app->run( qw/synopsis commands/ ) }, <<EOF, 'Verify synopsis commands works' );
+
+Commands:
+  noop
+  shell
+  synopsis [command|alias]
+  help [command|alias]
+EOF
+
+    output_is( $app, sub { $app->run( qw/synopsis aliases/ ) }, <<EOF, 'Verify synopsis aliases' );
+
+Aliases:
+  help2\t: help help
+  list\t: synopsis
 EOF
 }
