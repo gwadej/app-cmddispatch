@@ -5,12 +5,12 @@ use Test::More tests => 3;
 use strict;
 use warnings;
 
-use App::Subcmd;
+use App::CmdDispatch;
 
 sub shell_is ($$$)
 {
     my ($input, $expected, $label) = @_;
-    my $app = App::Subcmd->new( { noop => { code=> sub {} } } );
+    my $app = App::CmdDispatch->new( { noop => { code=> sub {} } } );
 
     my $actual;
     open my $ofh, '>>', \$actual or die "Unable to open fh to buffer.\n";

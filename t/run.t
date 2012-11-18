@@ -7,12 +7,12 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::Subcmd 'output_is';
+use Test::CmdDispatch 'output_is';
 
-use App::Subcmd;
+use App::CmdDispatch;
 
 {
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
         }
@@ -30,7 +30,7 @@ EOF
 }
 
 {
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
         }
@@ -48,7 +48,7 @@ EOF
 }
 
 {
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
         }
@@ -65,7 +65,7 @@ EOF
 }
 
 {
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
         }

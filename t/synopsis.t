@@ -7,14 +7,14 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::Subcmd 'output_is';
+use Test::CmdDispatch 'output_is';
 
-use App::Subcmd;
+use App::CmdDispatch;
 
 
 {
     my $label = 'Single command, handler only';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
         }
@@ -32,7 +32,7 @@ EOF
 
 {
     my $label = 'Single command, handler and synopsis';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {}, synopsis => 'noop [n]' },
         }
@@ -50,7 +50,7 @@ EOF
 
 {
     my $label = 'Single command, all supplied';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
         }

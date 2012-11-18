@@ -7,18 +7,18 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::Subcmd 'output_is';
+use Test::CmdDispatch 'output_is';
 
-use App::Subcmd;
+use App::CmdDispatch;
 
 {
     my $label = 'Single command, handler only';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
         }
     );
-    isa_ok( $app, 'App::Subcmd' );
+    isa_ok( $app, 'App::CmdDispatch' );
 
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and man found";
@@ -49,7 +49,7 @@ EOF
 
 {
     my $label = 'Single command, handler and synopsis';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {}, synopsis => 'noop [n]' },
         }
@@ -84,7 +84,7 @@ EOF
 
 {
     my $label = 'Single command, all supplied';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
         }
@@ -119,7 +119,7 @@ EOF
 
 {
     my $label = 'Single command, remove shell';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
             shell => undef,
@@ -152,7 +152,7 @@ EOF
 
 {
     my $label = 'Single command, remove synopsis';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
             synopsis => undef,
@@ -165,7 +165,7 @@ EOF
 
 {
     my $label = 'Single command, remove help';
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
             help => undef,
@@ -179,7 +179,7 @@ EOF
 {
     my $label = 'Replace synopsis';
     my $called = 0;
-    my $app = App::Subcmd->new(
+    my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
             synopsis => { code => sub { ++$called; }, synopsis => 'synopsis', help => 'Replaced synopsis' },

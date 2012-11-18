@@ -1,4 +1,4 @@
-package Test::Subcmd;
+package Test::CmdDispatch;
 
 use warnings;
 use strict;

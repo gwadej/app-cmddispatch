@@ -7,10 +7,10 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::Subcmd 'output_is';
+use Test::CmdDispatch 'output_is';
 
 use File::Temp;
-use App::Subcmd;
+use App::CmdDispatch;
 
 {
     my $ft = File::Temp->new( SUFFIX => '.conf' );
@@ -23,7 +23,7 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
     my $actual = $app->get_config;
     is_deeply( $actual, { parm1 => 1771, parm2 => 7171 }, 'Config is loaded.' )
         or note explain $actual;
@@ -40,7 +40,7 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
 
     output_is( $app, sub { $app->synopsis }, <<EOF, 'See both the commands and aliases' );
 
@@ -67,7 +67,7 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
 
     output_is( $app, sub { $app->run( 'list' ) }, <<EOF, 'Verify single command alias works' );
 
@@ -94,7 +94,7 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
 
     output_is( $app, sub { $app->run( 'help2' ) }, <<EOF, 'Verify command/arg alias works' );
 
@@ -115,7 +115,7 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
 
     output_is( $app, sub { $app->run( qw/help commands/ ) }, <<EOF, 'Verify help commands works' );
 
@@ -150,7 +150,7 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::Subcmd->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
 
     output_is( $app, sub { $app->run( qw/synopsis commands/ ) }, <<EOF, 'Verify synopsis commands works' );
 

@@ -1,4 +1,4 @@
-package App::Subcmd;
+package App::CmdDispatch;
 
 use warnings;
 use strict;
@@ -306,15 +306,15 @@ __END__
 
 =head1 NAME
 
-App::Subcmd - Handle command line processing for programs with subcommands
+App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::Subcmd version 0.003_02
+This document describes App::CmdDispatch version 0.003_02
 
 =head1 SYNOPSIS
 
-    use App::Subcmd;
+    use App::CmdDispatch;
 
     my %cmds = (
         start => {
@@ -339,34 +339,47 @@ This document describes App::Subcmd version 0.003_02
         },
     );
 
-    my $processor = App::Subcmd->new( \%cmds );
+    my $processor = App::CmdDispatch->new( \%cmds );
     $processor->run( @ARGV );
 
 =head1 DESCRIPTION
 
-This class handles command processing for a script based on a command
-description consisting of a hash containing the name of each command
-mapped to a hash giving code and help information.
+This class handles command processing for a script based on a dispatch
+table. Instead of just mapping each command name to a single coderef that
+implements the command, the values in the table are hashes that support
+both the command execution and help text.
+
+I have found the dispatch table to be a very effective approach for solving
+this kind of problem. Over time, I kept finding the need for other logic to
+provide help text in the program. This is an attempt to consolidate those
+pieces of information.
 
 =head1 INTERFACE 
 
-=head2 new
+=head2 new( $cmdhash, $options )
 
-=head2 run
+Create a new C<App::CmdDispatch> object. This method can take one or two
+hashrefs as arguments. The first is required and describes the commands.
+The second is optional and provides option information for the
+C<App::CmdDispatch> object.
 
-=head2 synopsis
+=head2 run( $cmd, @args )
 
-=head2 help
+Look up the supplied command and execute it.
 
-=head2 shell
+=head2 synopsis( $cmd )
 
-=head2 set_in_out
+=head2 help( $cmd )
 
-=head2 get_config
+=head2 shell()
+
+=head2 set_in_out( $ifh, $ofh )
+
+=head2 get_config()
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-App::Subcmd can read a configuration file specified in a Config::Tiny supported
+App::CmdDispatch can read a configuration file specified in a Config::Tiny supported
 format. Should be specified in the config parameter.
 
 =head1 DEPENDENCIES
@@ -383,7 +396,7 @@ None reported.
 No bugs have been reported.
 
 Please report any bugs or feature requests to
-C<bug-app-subcmd@rt.cpan.org>, or through the web interface at
+C<bug-app-cmddispatch@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
 

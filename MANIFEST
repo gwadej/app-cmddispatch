@@ -1,5 +1,5 @@
 Changes
-lib/App/Subcmd.pm
+lib/App/CmdDispatch.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
@@ -8,7 +8,7 @@ README
 t/00.load.t
 t/config.t
 t/help.t
-t/lib/Test/Subcmd.pm
+t/lib/Test/CmdDispatch.pm
 t/new-bad.t
 t/new.t
 t/run.t

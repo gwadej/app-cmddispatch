@@ -1,9 +1,9 @@
 use Test::More tests => 2;
 
 BEGIN {
-    use_ok( 'App::Subcmd' );
+    use_ok( 'App::CmdDispatch' );
 }
 
-note( "Testing App::Subcmd $App::Subcmd::VERSION" );
+note( "Testing App::CmdDispatch $App::CmdDispatch::VERSION" );
 
-can_ok( 'App::Subcmd', qw/new set_in_out get_config run help synopsis shell/ );
+can_ok( 'App::CmdDispatch', qw/new set_in_out get_config run help synopsis shell/ );

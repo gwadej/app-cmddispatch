@@ -1,4 +1,4 @@
-App-Subcmd version 0.03_01
+App-CmdDispatch version 0.03_03
 
 This module is the result of extracting some command processing from a few
 scripts in order to reuse some functionality.
