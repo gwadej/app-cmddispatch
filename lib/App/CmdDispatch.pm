@@ -5,7 +5,7 @@ use strict;
 use Config::Tiny;
 use Term::ReadLine;
 
-our $VERSION = '0.003_02';
+our $VERSION = '0.003_03';
 
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
@@ -310,7 +310,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::CmdDispatch version 0.003_02
+This document describes App::CmdDispatch version 0.003_03
 
 =head1 SYNOPSIS
 
@@ -344,15 +344,19 @@ This document describes App::CmdDispatch version 0.003_02
 
 =head1 DESCRIPTION
 
-This class handles command processing for a script based on a dispatch
-table. Instead of just mapping each command name to a single coderef that
-implements the command, the values in the table are hashes that support
-both the command execution and help text.
+One way to map a series of command strings to the code to execute for that
+string is a dispatch table. The simplest dispatch table maps strings directly
+to code refs. A more complicated dispatch table maps strings to objects that
+provide a wider interface than just a single function call. I often find I want
+more than a single function and less than a full object.
 
-I have found the dispatch table to be a very effective approach for solving
-this kind of problem. Over time, I kept finding the need for other logic to
-provide help text in the program. This is an attempt to consolidate those
-pieces of information.
+App::CmdDispatch falls in between these two extremes. One thing I always found
+that I needed with my dispatch table-driven scripts was decent help that
+covered all of the commands. App::CmdDispatch makes each command map to a hash
+containing a code reference and a pair of help strings.
+
+Since beginning to use git, I have found git's alias feature to be extremely
+helpful. App::CmdDispatch supports reading aliases from a config file.
 
 =head1 INTERFACE 
 
@@ -369,13 +373,25 @@ Look up the supplied command and execute it.
 
 =head2 synopsis( $cmd )
 
+Print a short synopsis listing all commands and aliases or just the synopsis
+for the supplied command.
+
 =head2 help( $cmd )
+
+Print help for the program or just help on the supplied command.
 
 =head2 shell()
 
+Start a read/execute loop which supports running multiple commands in the same
+execution of the main program.
+
 =head2 set_in_out( $ifh, $ofh )
 
+Reset the input and output file handles for the dispatcher.
+
 =head2 get_config()
+
+Return a reference to the configuration hash for the dispatcher.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
@@ -399,7 +415,6 @@ Please report any bugs or feature requests to
 C<bug-app-cmddispatch@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
-
 =head1 AUTHOR
 
 G. Wade Johnson  C<< <wade@cpan.org> >>
@@ -410,7 +425,6 @@ Copyright (c) 2012, G. Wade Johnson C<< <wade@cpan.org> >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 
