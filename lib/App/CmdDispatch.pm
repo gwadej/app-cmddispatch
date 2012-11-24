@@ -5,7 +5,7 @@ use strict;
 use Config::Tiny;
 use Term::ReadLine;
 
-our $VERSION = '0.003_03';
+our $VERSION = '0.004_01';
 
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
@@ -310,7 +310,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::CmdDispatch version 0.003_03
+This document describes App::CmdDispatch version 0.004_01
 
 =head1 SYNOPSIS
 

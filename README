@@ -1,8 +1,8 @@
 NAME
-    App::CmdDispatch - Handle command line processing for programs with subcommands
+    App::CmdDispatch - Handle commands with a dispatch table
     
 VERSION
-    Version 0.03_03
+    Version 0.04_01
 
 SYNOPSIS
 
