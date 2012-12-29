@@ -199,7 +199,7 @@ sub help
 sub _do_synopsis
 {
     my ($self) = @_;
-    return $self->{cmds}->{'synopsis'}->{code}->( $self ) if $self->{cmds}->{'synopsis'};
+    return $self->{cmds}->{$SHORT_HELP}->{code}->( $self ) if $self->{cmds}->{$SHORT_HELP};
     return $self->synopsis();
 }
 
@@ -236,14 +236,14 @@ sub _ensure_valid_command_description
     my ( $self, $cmds ) = @_;
 
     # Set defaults with closures that reference this object
-    $self->{cmds}->{help} = {
+    $self->{cmds}->{$LONG_HELP} = {
         code     => \&App::CmdDispatch::help,
-        synopsis => 'help [command|alias]',
+        synopsis => "$LONG_HELP [command|alias]",
         help => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
-    $self->{cmds}->{synopsis} = {
+    $self->{cmds}->{$SHORT_HELP} = {
         code     => \&App::CmdDispatch::synopsis,
-        synopsis => 'synopsis [command|alias]',
+        synopsis => "$SHORT_HELP [command|alias]",
         help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     $self->{cmds}->{shell} = {
