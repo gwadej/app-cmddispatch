@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Config::Tiny;
 use Term::ReadLine;
+use App::CmdDispatch::IO;
 
 our $VERSION = '0.004_01';
 
@@ -23,13 +24,24 @@ sub new
 
     my %config      = %{$options};
     my $config_file = delete $config{config};
+    my $io          = delete $config{io};
+    if($io)
+    {
+        if(ref $io and 2 != grep { $io->can( $_ ) } qw/print prompt/)
+        {
+            die "Object supplied as io parameter does not supply correct interface.\n";
+        }
+    }
+    else
+    {
+        $io = App::CmdDispatch::IO->new();
+    }
 
     my $self = bless {
         cmds    => {},
         alias   => {},
         config  => \%config,
-        readfh  => \*STDIN,
-        writefh => \*STDOUT,
+        io      => $io,
     }, $class;
 
     if( defined $config_file )
@@ -41,14 +53,6 @@ sub new
     $self->_ensure_valid_command_description( $commands );
 
     return $self;
-}
-
-sub set_in_out
-{
-    my ( $self, $in, $out ) = @_;
-    $self->{readfh}  = $in  if defined $in;
-    $self->{writefh} = $out if defined $out;
-    return;
 }
 
 sub get_config { return $_[0]->{config}; }
@@ -285,15 +289,13 @@ sub _initialize_config
 sub _print
 {
     my $self = shift;
-    print { $self->{writefh} } @_;
-    return;
+    return  $self->{io}->print( @_ );
 }
 
 sub _prompt
 {
     my $self = shift;
-    print { $self->{writefh} } @_;
-    return readline( $self->{readfh} );
+    return $self->{io}->prompt( @_ );
 }
 
 sub _is_missing { return !defined $_[0] || $_[0] eq ''; }

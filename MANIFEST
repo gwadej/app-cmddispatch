@@ -1,5 +1,6 @@
 Changes
 lib/App/CmdDispatch.pm
+lib/App/CmdDispatch/IO.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
@@ -9,6 +10,7 @@ t/00.load.t
 t/config.t
 t/help.t
 t/lib/Test/CmdDispatch.pm
+t/lib/Test/IO.pm
 t/new-bad.t
 t/new.t
 t/run.t

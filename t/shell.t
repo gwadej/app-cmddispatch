@@ -5,20 +5,22 @@ use Test::More tests => 3;
 use strict;
 use warnings;
 
+use FindBin;
+use lib "$FindBin::Bin/lib";
 use App::CmdDispatch;
+use Test::IO;
 
 sub shell_is ($$$)
 {
     my ($input, $expected, $label) = @_;
-    my $app = App::CmdDispatch->new( { noop => { code=> sub {} } } );
+
+    $input .= "\nquit\n" unless $input =~ /\bquit\b/;
+    my $io = Test::IO->new( $input );
+    my $app = App::CmdDispatch->new( { noop => { code=> sub {} } }, { io => $io } );
 
     my $actual;
-    open my $ofh, '>>', \$actual or die "Unable to open fh to buffer.\n";
-    $input .= "\nquit\n" unless $input =~ /\bquit\b/;
-    open my $ifh, '<', \$input or die "Unable to open fh to input.\n";
-    $app->set_in_out( $ifh, $ofh );
     $app->shell;
-    return is( $actual, $expected, $label );
+    return is( $io->output, $expected, $label );
 }
 
 shell_is( "quit\n", "Enter a command or 'quit' to exit:\n> ", 'Immediately exit shell' );

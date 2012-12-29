@@ -7,23 +7,26 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::CmdDispatch 'output_is';
+use Test::IO;
 
 use App::CmdDispatch;
 
 {
     my $label = 'Single command, handler only';
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-        }
+        },
+        { io => $io }
     );
     isa_ok( $app, 'App::CmdDispatch' );
 
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and man found";
 
-    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Default help supplied" );
+    $app->synopsis;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
@@ -32,7 +35,9 @@ Commands:
   help [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help }, <<EOF, "$label: Default help supplied" );
+    $io->clear;
+    $app->help;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
@@ -49,16 +54,19 @@ EOF
 
 {
     my $label = 'Single command, handler and synopsis';
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {}, synopsis => 'noop [n]' },
-        }
+        },
+        { io => $io }
     );
 
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
-    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Synopsis as supplied" );
+    $app->synopsis;
+    is( $io->output, <<EOF, "$label: Synopsis as supplied" );
 
 Commands:
   noop [n]
@@ -67,7 +75,9 @@ Commands:
   help [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help; }, <<EOF, "$label: Default help supplied" );
+    $io->clear;
+    $app->help;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop [n]
@@ -84,16 +94,19 @@ EOF
 
 {
     my $label = 'Single command, all supplied';
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
-        }
+        },
+        { io => $io }
     );
 
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
-    output_is( $app, sub { $app->synopsis }, <<EOF, "$label: Help as supplied" );
+    $app->synopsis;
+    is( $io->output, <<EOF, "$label: Help as supplied" );
 
 Commands:
   noop [n]
@@ -102,7 +115,9 @@ Commands:
   help [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help; }, <<EOF, "$label: Default help supplied" );
+    $io->clear;
+    $app->help;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop [n]
@@ -119,17 +134,20 @@ EOF
 
 {
     my $label = 'Single command, remove shell';
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
             shell => undef,
-        }
+        },
+        { io => $io }
     );
 
     # Using private method for testing.
     is_deeply [ $app->_command_list() ], [qw/noop synopsis help/], "$label: shell has been removed";
 
-    output_is( $app, sub { $app->synopsis; }, <<EOF, "$label: shell removed from help" );
+    $app->synopsis;
+    is( $io->output, <<EOF, "$label: shell removed from help" );
 
 Commands:
   noop
@@ -137,7 +155,9 @@ Commands:
   help [command|alias]
 EOF
 
-    output_is( $app, sub { $app->help; }, <<EOF, "$label: Default help supplied" );
+    $io->clear;
+    $app->help;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
@@ -179,11 +199,13 @@ EOF
 {
     my $label = 'Replace synopsis';
     my $called = 0;
+    my $io = Test::IO->new;
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
             synopsis => { code => sub { ++$called; }, synopsis => 'synopsis', help => 'Replaced synopsis' },
-        }
+        },
+        { io => $io }
     );
 
     # Using private method for testing.
@@ -193,7 +215,8 @@ EOF
     $app->run( 'synopsis' );
     is( $called, 1, "$label: Replacement code is called" );
 
-    output_is( $app, sub { $app->help; }, <<EOF, "$label: synopsis strings replaced" );
+    $app->help;
+    is( $io->output, <<EOF, "$label: synopsis strings replaced" );
 
 Commands:
   noop

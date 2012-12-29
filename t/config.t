@@ -7,7 +7,7 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::CmdDispatch 'output_is';
+use Test::IO;
 
 use File::Temp;
 use App::CmdDispatch;
@@ -40,36 +40,11 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $io = Test::IO->new;
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
-    output_is( $app, sub { $app->synopsis }, <<EOF, 'See both the commands and aliases' );
-
-Commands:
-  noop
-  shell
-  synopsis [command|alias]
-  help [command|alias]
-
-Aliases:
-  help2	: help help
-  list	: synopsis
-EOF
-}
-
-{
-    my $ft = File::Temp->new( SUFFIX => '.conf' );
-    print {$ft} <<EOF;
-parm1=1771
-parm2=7171
-[alias]
-list=synopsis
-help2=help help
-EOF
-    close $ft;
-
-    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
-
-    output_is( $app, sub { $app->run( 'list' ) }, <<EOF, 'Verify single command alias works' );
+    $app->synopsis;
+    is( $io->output, <<EOF, 'See both the commands and aliases' );
 
 Commands:
   noop
@@ -94,9 +69,40 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $io = Test::IO->new;
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
-    output_is( $app, sub { $app->run( 'help2' ) }, <<EOF, 'Verify command/arg alias works' );
+    $app->run( 'list' );
+    is( $io->output, <<EOF, 'Verify single command alias works' );
+
+Commands:
+  noop
+  shell
+  synopsis [command|alias]
+  help [command|alias]
+
+Aliases:
+  help2	: help help
+  list	: synopsis
+EOF
+}
+
+{
+    my $ft = File::Temp->new( SUFFIX => '.conf' );
+    print {$ft} <<EOF;
+parm1=1771
+parm2=7171
+[alias]
+list=synopsis
+help2=help help
+EOF
+    close $ft;
+
+    my $io = Test::IO->new;
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
+
+    $app->run( 'help2' );
+    is( $io->output, <<EOF, 'Verify command/arg alias works' );
 
 help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -115,9 +121,11 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $io = Test::IO->new;
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
-    output_is( $app, sub { $app->run( qw/help commands/ ) }, <<EOF, 'Verify help commands works' );
+    $app->run( qw/help commands/ );
+    is( $io->output, <<EOF, 'Verify help commands works' );
 
 Commands:
   noop
@@ -131,7 +139,9 @@ Commands:
         argument.
 EOF
 
-    output_is( $app, sub { $app->run( qw/help aliases/ ) }, <<EOF, 'Verify help aliases' );
+    $io->clear;
+    $app->run( qw/help aliases/ );
+    is( $io->output, <<EOF, 'Verify help aliases' );
 
 Aliases:
   help2\t: help help
@@ -150,9 +160,11 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $io = Test::IO->new;
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
-    output_is( $app, sub { $app->run( qw/synopsis commands/ ) }, <<EOF, 'Verify synopsis commands works' );
+    $app->run( qw/synopsis commands/ );
+    is( $io->output, <<EOF, 'Verify synopsis commands works' );
 
 Commands:
   noop
@@ -161,7 +173,9 @@ Commands:
   help [command|alias]
 EOF
 
-    output_is( $app, sub { $app->run( qw/synopsis aliases/ ) }, <<EOF, 'Verify synopsis aliases' );
+    $io->clear;
+    $app->run( qw/synopsis aliases/ );
+    is( $io->output, <<EOF, 'Verify synopsis aliases' );
 
 Aliases:
   help2\t: help help

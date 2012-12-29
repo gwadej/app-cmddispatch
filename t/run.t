@@ -7,18 +7,21 @@ use warnings;
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Test::CmdDispatch 'output_is';
+use Test::IO;
 
 use App::CmdDispatch;
 
 {
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-        }
+        },
+        { io => $io }
     );
 
-    output_is( $app, sub { $app->run(); }, <<EOF, "Running with no command gives error.\n" );
+    $app->run();
+    is( $io->output, <<EOF, "Running with no command gives error.\n" );
 Missing command
 
 Commands:
@@ -30,13 +33,16 @@ EOF
 }
 
 {
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-        }
+        },
+        { io => $io }
     );
 
-    output_is( $app, sub { $app->run( '' ); }, <<EOF, "Running with empty command gives error.\n" );
+    $app->run( '' );
+    is( $io->output, <<EOF, "Running with empty command gives error.\n" );
 Missing command
 
 Commands:
@@ -48,13 +54,16 @@ EOF
 }
 
 {
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-        }
+        },
+        { io => $io }
     );
 
-    output_is( $app, sub { $app->run( 'synopsis' ); }, <<EOF, "Synopsis command run successfully" );
+    $app->run( 'synopsis' );
+    is( $io->output, <<EOF, "Synopsis command run successfully" );
 
 Commands:
   noop
@@ -65,13 +74,16 @@ EOF
 }
 
 {
+    my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-        }
+        },
+        { io => $io }
     );
 
-    output_is( $app, sub { $app->run( 'foo' ); }, <<EOF, "Unrecognized command gives error" );
+    $app->run( 'foo' );
+    is( $io->output, <<EOF, "Unrecognized command gives error" );
 Unrecognized command 'foo'
 
 Commands:
