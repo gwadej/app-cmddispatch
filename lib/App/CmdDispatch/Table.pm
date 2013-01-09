@@ -11,6 +11,7 @@ sub UnknownCommand { return "Unrecognized command\n"; }
 sub new
 {
     my ( $class, $commands, $aliases ) = @_;
+    $aliases ||= {};
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
     die "No commands specified.\n"               unless keys %{$commands};
     die "Aliases definition is not a hashref.\n" unless ref $aliases eq ref {};
