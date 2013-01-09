@@ -1,6 +1,7 @@
 Changes
 lib/App/CmdDispatch.pm
 lib/App/CmdDispatch/IO.pm
+lib/App/CmdDispatch/Core.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP

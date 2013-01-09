@@ -22,8 +22,7 @@ use App::CmdDispatch;
     );
     isa_ok( $app, 'App::CmdDispatch' );
 
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and man found";
+    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and man found";
 
     $app->synopsis;
     is( $io->output, <<EOF, "$label: Default help supplied" );
@@ -62,8 +61,7 @@ EOF
         { io => $io }
     );
 
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
+    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
     $app->synopsis;
     is( $io->output, <<EOF, "$label: Synopsis as supplied" );
@@ -102,8 +100,7 @@ EOF
         { io => $io }
     );
 
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
+    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
     $app->synopsis;
     is( $io->output, <<EOF, "$label: Help as supplied" );
@@ -143,8 +140,7 @@ EOF
         { io => $io }
     );
 
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop synopsis help/], "$label: shell has been removed";
+    is_deeply [ $app->command_list() ], [qw/noop synopsis help/], "$label: shell has been removed";
 
     $app->synopsis;
     is( $io->output, <<EOF, "$label: shell removed from help" );
@@ -180,7 +176,7 @@ EOF
     );
 
     # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell help/], "$label: synopsis has been removed";
+    is_deeply [ $app->command_list() ], [qw/noop shell help/], "$label: synopsis has been removed";
 }
 
 {
@@ -192,8 +188,7 @@ EOF
         }
     );
 
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis/], "$label: help has been removed";
+    is_deeply [ $app->command_list() ], [qw/noop shell synopsis/], "$label: help has been removed";
 }
 
 {
@@ -208,8 +203,7 @@ EOF
         { io => $io }
     );
 
-    # Using private method for testing.
-    is_deeply [ $app->_command_list() ], [qw/noop shell synopsis help/], "$label: synopsis still there";
+    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: synopsis still there";
 
     is( $called, 0, "$label: No calls made" );
     $app->run( 'synopsis' );

@@ -5,6 +5,7 @@ use strict;
 use Config::Tiny;
 use Term::ReadLine;
 use App::CmdDispatch::IO;
+use App::CmdDispatch::Core;
 
 our $VERSION = '0.004_01';
 
@@ -17,14 +18,32 @@ my $LONG_HELP  = 'help';
 sub new
 {
     my ( $class, $commands, $options ) = @_;
-    $options ||= {};
+
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
     die "No commands specified.\n"               unless keys %{$commands};
-    die "Options parameter is not a hashref.\n"  unless ref $options  eq ref {};
 
-    my %config      = %{$options};
-    my $config_file = delete $config{config};
-    my $io          = delete $config{io};
+    $commands = {
+        $LONG_HELP => {
+            code     => \&App::CmdDispatch::help,
+            synopsis => "$LONG_HELP [command|alias]",
+            help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+        },
+        $SHORT_HELP => {
+            code     => \&App::CmdDispatch::synopsis,
+            synopsis => "$SHORT_HELP [command|alias]",
+            help => 'A list of commands and/or aliases. Limit display with the argument.',
+        },
+        shell => {
+            code     => \&App::CmdDispatch::shell,
+            synopsis => 'shell',
+            help     => 'Execute commands as entered until quit.',
+        },
+        %{ $commands },
+    };
+    my $core = App::CmdDispatch::Core->new( $commands, $options );
+
+    my $config = $core->get_config();
+    my $io = delete $config->{'io'};
     if($io)
     {
         if(ref $io and 2 != grep { $io->can( $_ ) } qw/print prompt/)
@@ -38,80 +57,71 @@ sub new
     }
 
     my $self = bless {
-        cmds    => {},
-        alias   => {},
-        config  => \%config,
-        io      => $io,
+        core => $core,
+        io   => $io,
     }, $class;
-
-    if( defined $config_file )
-    {
-        die "Supplied config is not a file.\n" unless -f $config_file;
-        $self->_initialize_config( $config_file );
-    }
-
-    $self->_ensure_valid_command_description( $commands );
 
     return $self;
 }
 
-sub get_config { return $_[0]->{config}; }
+sub get_config { return $_[0]->{core}->get_config; }
 
 sub run
 {
     my ( $self, $cmd, @args ) = @_;
 
-    if( _is_missing( $cmd ) )
-    {
-        $self->_print( "Missing command\n" );
-        $self->_do_synopsis();
-        return;
-    }
-
-    # Handle alias if one is supplied
-    if( exists $self->{'alias'}->{$cmd} )
-    {
-        ( $cmd, @args ) = ( ( split / /, $self->{'alias'}->{$cmd} ), @args );
-    }
-
-    # Handle builtin commands
-    if( $self->{cmds}->{$cmd} )
-    {
-        $self->{cmds}->{$cmd}->{'code'}->( $self, @args );
-    }
-    else
-    {
-        $self->_print( "Unrecognized command '$cmd'\n" );
-        $self->_do_synopsis();
-    }
+    eval {
+        $self->{core}->run( $self, $cmd, @args );
+        1;
+    } or do {
+        my $ex = $@;
+        if( $ex eq App::CmdDispatch::Core::MissingCommand() )
+        {
+            $self->_print( "Missing command\n" );
+            $self->synopsis;
+        }
+        elsif( $ex eq App::CmdDispatch::Core::UnknownCommand() )
+        {
+            $self->_print( "Unrecognized command '$cmd'\n" );
+            $self->synopsis;
+        }
+        else
+        {
+            die $ex;
+        }
+    };
     return;
 }
 
-sub _command_list
+sub command_list
 {
     my ( $self ) = @_;
-    return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } keys %{ $self->{cmds} } ), grep { $self->{cmds}->{$_} } ($SHORT_HELP, $LONG_HELP);
+    my @cmds = $self->{core}->command_list();
+    return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } @cmds ), grep { $self->{core}->get_command_desc( $_ ) } ($SHORT_HELP, $LONG_HELP);
 }
 
 sub _synopsis_string
 {
     my ( $self, $cmd ) = @_;
-    return $self->{cmds}->{$cmd}->{synopsis};
+    my $desc = $self->{core}->get_command_desc( $cmd );
+    return $desc ? $desc->{synopsis} : $desc;
 }
 
 sub _help_string
 {
     my ( $self, $cmd ) = @_;
-    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $self->{cmds}->{$cmd}->{help} );
+    my $desc = $self->{core}->get_command_desc( $cmd );
+    return '' unless defined $desc;
+    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $desc->{help} );
 }
 
 sub _list_command
 {
     my ( $self, $code ) = @_;
     $self->_print( "\nCommands:\n" );
-    foreach my $c ( $self->_command_list() )
+    foreach my $c ( $self->command_list() )
     {
-        next if $c eq '' or !$self->{cmds}->{$c};
+        next if $c eq '' or !$self->{core}->get_command_desc( $c );
         $self->_print( $code->( $c ) );
     }
     return;
@@ -128,7 +138,7 @@ sub synopsis
         return;
     }
 
-    if( $self->{cmds}->{$arg} )
+    if( $self->{core}->get_command_desc( $arg ) )
     {
         $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
     }
@@ -163,7 +173,7 @@ sub help
         return;
     }
 
-    if( $self->{cmds}->{$arg} )
+    if( $self->{core}->get_command_desc( $arg ) )
     {
         $self->_print(
             "\n",
@@ -199,19 +209,22 @@ sub help
 sub _do_synopsis
 {
     my ($self) = @_;
-    return $self->{cmds}->{$SHORT_HELP}->{code}->( $self ) if $self->{cmds}->{$SHORT_HELP};
+    my $desc = $self->{core}->get_command_desc( $SHORT_HELP );
+    return $desc->{code}->( $self ) if $desc;
     return $self->synopsis();
 }
+
+sub alias_list { return $_[0]->{core}->alias_list(); }
 
 sub _list_aliases
 {
     my ( $self ) = @_;
-    return unless keys %{ $self->{'alias'} };
+    return unless $self->{core}->has_aliases;
 
     $self->_print( "\nAliases:\n" );
-    foreach my $c ( sort keys %{ $self->{'alias'} } )
+    foreach my $c ( $self->alias_list() )
     {
-        $self->_print( "$CMD_INDENT$c\t: $self->{'alias'}->{$c}\n" );
+        $self->_print( "$CMD_INDENT$c\t: " . $self->{core}->get_alias( $c ) . "\n" );
     }
     return;
 }
@@ -228,61 +241,6 @@ sub shell
         last if $line eq 'quit';
         $self->run( split /\s+/, $line );
     }
-    return;
-}
-
-sub _ensure_valid_command_description
-{
-    my ( $self, $cmds ) = @_;
-
-    # Set defaults with closures that reference this object
-    $self->{cmds}->{$LONG_HELP} = {
-        code     => \&App::CmdDispatch::help,
-        synopsis => "$LONG_HELP [command|alias]",
-        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
-    };
-    $self->{cmds}->{$SHORT_HELP} = {
-        code     => \&App::CmdDispatch::synopsis,
-        synopsis => "$SHORT_HELP [command|alias]",
-        help => 'A list of commands and/or aliases. Limit display with the argument.',
-    };
-    $self->{cmds}->{shell} = {
-        code     => \&App::CmdDispatch::shell,
-        synopsis => 'shell',
-        help     => 'Execute commands as entered until quit.',
-    };
-
-    # Override defaults with supplied commands.
-    while ( my ( $key, $val ) = each %{$cmds} )
-    {
-        next if $key eq '';
-        if( !defined $val )
-        {
-            delete $self->{cmds}->{$key};
-            next;
-        }
-        die "Command '$key' is an invalid descriptor.\n" unless ref $val eq ref {};
-        die "Command '$key' has no handler.\n" unless ref $val->{code} eq 'CODE';
-
-        my $desc = { %{$val} };
-        $desc->{synopsis} = $key unless defined $desc->{synopsis};
-        $desc->{help}     = ''   unless defined $desc->{help};
-        $self->{cmds}->{$key} = $desc;
-    }
-
-    return;
-}
-
-sub _initialize_config
-{
-    my ( $self, $config_file ) = @_;
-    my $conf = Config::Tiny->read( $config_file );
-    %{ $self->{alias} }  = %{ delete $conf->{alias} };
-    %{ $self->{config} } = (
-        ( $conf->{_} ? %{ delete $conf->{_} } : () ),    # first extract the top level
-        %{$conf},                # Keep any multi-levels that are not aliases
-        %{ $self->{config} },    # Override with supplied parameters
-    );
     return;
 }
 
@@ -387,13 +345,17 @@ Print help for the program or just help on the supplied command.
 Start a read/execute loop which supports running multiple commands in the same
 execution of the main program.
 
-=head2 set_in_out( $ifh, $ofh )
-
-Reset the input and output file handles for the dispatcher.
-
 =head2 get_config()
 
 Return a reference to the configuration hash for the dispatcher.
+
+=head2 command_list()
+
+Returns the list of commands in a defined order.
+
+=head2 alias_list()
+
+Returnd the list of aliases in sorted order.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 

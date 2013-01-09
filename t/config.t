@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 use strict;
 use warnings;
@@ -43,19 +43,12 @@ EOF
     my $io = Test::IO->new;
     my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
-    $app->synopsis;
-    is( $io->output, <<EOF, 'See both the commands and aliases' );
-
-Commands:
-  noop
-  shell
-  synopsis [command|alias]
-  help [command|alias]
-
-Aliases:
-  help2	: help help
-  list	: synopsis
-EOF
+    my $got = [ $app->command_list ];
+    is_deeply( $got, [ qw/noop shell synopsis help/ ], "Correct commands found.\n" )
+        or note explain $got;
+    $got = [ $app->alias_list ];
+    is_deeply( $got, [ qw/help2 list/ ], "Correct aliases found.\n" )
+        or note explain $got;
 }
 
 {
