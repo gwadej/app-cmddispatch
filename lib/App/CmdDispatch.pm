@@ -5,9 +5,9 @@ use strict;
 use Config::Tiny;
 use Term::ReadLine;
 use App::CmdDispatch::IO;
-use App::CmdDispatch::Core;
+use App::CmdDispatch::Table;
 
-our $VERSION = '0.004_01';
+our $VERSION = '0.004_02';
 
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
@@ -19,8 +19,22 @@ sub new
 {
     my ( $class, $commands, $options ) = @_;
 
+    $options ||= {};
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
     die "No commands specified.\n"               unless keys %{$commands};
+    die "Options parameter is not a hashref.\n"  unless $options and ref $options  eq ref {};
+
+    my %config      = %{$options};
+    my $config_file = delete $config{config};
+    my $aliases;
+    my $self = bless { config => \%config }, $class;
+    if( defined $config_file )
+    {
+        die "Supplied config is not a file.\n" unless -f $config_file;
+        $self->_initialize_config( $config_file );
+        $aliases = delete $self->{config}->{alias};
+    }
+    $aliases = {} unless ref $aliases eq ref {};
 
     $commands = {
         $LONG_HELP => {
@@ -40,10 +54,10 @@ sub new
         },
         %{ $commands },
     };
-    my $core = App::CmdDispatch::Core->new( $commands, $options );
+    my $table = App::CmdDispatch::Table->new( $commands, $aliases );
+    $self->_normalize_help( $table );
 
-    my $config = $core->get_config();
-    my $io = delete $config->{'io'};
+    my $io = delete $config{'io'};
     if($io)
     {
         if(ref $io and 2 != grep { $io->can( $_ ) } qw/print prompt/)
@@ -56,31 +70,29 @@ sub new
         $io = App::CmdDispatch::IO->new();
     }
 
-    my $self = bless {
-        core => $core,
-        io   => $io,
-    }, $class;
+    $self->{table} = $table;
+    $self->{io}    = $io;
 
     return $self;
 }
 
-sub get_config { return $_[0]->{core}->get_config; }
+sub get_config { return $_[0]->{config}; }
 
 sub run
 {
     my ( $self, $cmd, @args ) = @_;
 
     eval {
-        $self->{core}->run( $self, $cmd, @args );
+        $self->{table}->run( $self, $cmd, @args );
         1;
     } or do {
         my $ex = $@;
-        if( $ex eq App::CmdDispatch::Core::MissingCommand() )
+        if( $ex eq App::CmdDispatch::Table::MissingCommand() )
         {
             $self->_print( "Missing command\n" );
             $self->synopsis;
         }
-        elsif( $ex eq App::CmdDispatch::Core::UnknownCommand() )
+        elsif( $ex eq App::CmdDispatch::Table::UnknownCommand() )
         {
             $self->_print( "Unrecognized command '$cmd'\n" );
             $self->synopsis;
@@ -96,21 +108,21 @@ sub run
 sub command_list
 {
     my ( $self ) = @_;
-    my @cmds = $self->{core}->command_list();
-    return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } @cmds ), grep { $self->{core}->get_command_desc( $_ ) } ($SHORT_HELP, $LONG_HELP);
+    my @cmds = $self->{table}->command_list();
+    return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } @cmds ), grep { $self->{table}->get_command( $_ ) } ($SHORT_HELP, $LONG_HELP);
 }
 
 sub _synopsis_string
 {
     my ( $self, $cmd ) = @_;
-    my $desc = $self->{core}->get_command_desc( $cmd );
+    my $desc = $self->{table}->get_command( $cmd );
     return $desc ? $desc->{synopsis} : $desc;
 }
 
 sub _help_string
 {
     my ( $self, $cmd ) = @_;
-    my $desc = $self->{core}->get_command_desc( $cmd );
+    my $desc = $self->{table}->get_command( $cmd );
     return '' unless defined $desc;
     return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $desc->{help} );
 }
@@ -121,7 +133,7 @@ sub _list_command
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->command_list() )
     {
-        next if $c eq '' or !$self->{core}->get_command_desc( $c );
+        next if $c eq '' or !$self->{table}->get_command( $c );
         $self->_print( $code->( $c ) );
     }
     return;
@@ -138,7 +150,7 @@ sub synopsis
         return;
     }
 
-    if( $self->{core}->get_command_desc( $arg ) )
+    if( $self->{table}->get_command( $arg ) )
     {
         $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
     }
@@ -173,7 +185,7 @@ sub help
         return;
     }
 
-    if( $self->{core}->get_command_desc( $arg ) )
+    if( $self->{table}->get_command( $arg ) )
     {
         $self->_print(
             "\n",
@@ -209,22 +221,22 @@ sub help
 sub _do_synopsis
 {
     my ($self) = @_;
-    my $desc = $self->{core}->get_command_desc( $SHORT_HELP );
+    my $desc = $self->{table}->get_command( $SHORT_HELP );
     return $desc->{code}->( $self ) if $desc;
     return $self->synopsis();
 }
 
-sub alias_list { return $_[0]->{core}->alias_list(); }
+sub alias_list { return $_[0]->{table}->alias_list(); }
 
 sub _list_aliases
 {
     my ( $self ) = @_;
-    return unless $self->{core}->has_aliases;
+    return unless $self->{table}->has_aliases;
 
     $self->_print( "\nAliases:\n" );
     foreach my $c ( $self->alias_list() )
     {
-        $self->_print( "$CMD_INDENT$c\t: " . $self->{core}->get_alias( $c ) . "\n" );
+        $self->_print( "$CMD_INDENT$c\t: " . $self->{table}->get_alias( $c ) . "\n" );
     }
     return;
 }
@@ -257,6 +269,30 @@ sub _prompt
 }
 
 sub _is_missing { return !defined $_[0] || $_[0] eq ''; }
+
+sub _initialize_config
+{
+    my ( $self, $config_file ) = @_;
+    my $conf = Config::Tiny->read( $config_file );
+    %{ $self->{config} } = (
+        ( $conf->{_} ? %{ delete $conf->{_} } : () ),    # first extract the top level
+        %{$conf},                # Keep any multi-levels that are not aliases
+        %{ $self->{config} },    # Override with supplied parameters
+    );
+    return;
+}
+
+sub _normalize_help
+{
+    my ( $self, $table ) = @_;
+    foreach my $cmd ( $table->command_list )
+    {
+        my $desc = $table->get_command( $cmd );
+        $desc->{synopsis} = $cmd unless defined $desc->{synopsis};
+        $desc->{help}     = ''   unless defined $desc->{help};
+    }
+    return;
+}
 
 1;
 
