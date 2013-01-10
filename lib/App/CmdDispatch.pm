@@ -24,10 +24,10 @@ sub new
     die "No commands specified.\n"               unless keys %{$commands};
     die "Options parameter is not a hashref.\n"  unless $options and ref $options  eq ref {};
 
-    my %config      = %{$options};
-    my $config_file = delete $config{config};
+    $options = { %{$options} };
+    my $config_file = delete $options->{config};
     my $aliases;
-    my $self = bless { config => \%config }, $class;
+    my $self = bless { config => $options }, $class;
     if( defined $config_file )
     {
         die "Supplied config is not a file.\n" unless -f $config_file;
@@ -39,22 +39,8 @@ sub new
     $commands = $self->_setup_commands( $commands );
     my $table = App::CmdDispatch::Table->new( $commands, $aliases );
     $self->_normalize_help( $table );
-
-    my $io = delete $config{'io'};
-    if($io)
-    {
-        if(ref $io and 2 != grep { $io->can( $_ ) } qw/print prompt/)
-        {
-            die "Object supplied as io parameter does not supply correct interface.\n";
-        }
-    }
-    else
-    {
-        $io = App::CmdDispatch::IO->new();
-    }
-
     $self->{table} = $table;
-    $self->{io}    = $io;
+    $self->_initialize_io_object();
 
     return $self;
 }
@@ -265,9 +251,31 @@ sub _initialize_config
     return;
 }
 
+sub _initialize_io_object
+{
+    my ($self) = @_;
+
+    my $io = delete $self->{config}->{'io'};
+    if($io)
+    {
+        if(ref $io and 2 != grep { $io->can( $_ ) } qw/print prompt/)
+        {
+            die "Object supplied as io parameter does not supply correct interface.\n";
+        }
+    }
+    else
+    {
+        $io = App::CmdDispatch::IO->new();
+    }
+
+    $self->{io} = $io;
+    return;
+}
+
 sub _setup_commands
 {
     my( $self, $commands ) = @_;
+    $commands = { %{$commands} };
 
     return $commands unless $self->{config}->{default_commands};
 
