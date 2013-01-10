@@ -34,6 +34,7 @@ EOF
     print {$ft} <<EOF;
 parm1=1771
 parm2=7171
+default_commands=shell help
 [alias]
 list=synopsis
 help2=help help
@@ -56,6 +57,7 @@ EOF
     print {$ft} <<EOF;
 parm1=1771
 parm2=7171
+default_commands=shell help
 [alias]
 list=synopsis
 help2=help help
@@ -85,6 +87,7 @@ EOF
     print {$ft} <<EOF;
 parm1=1771
 parm2=7171
+default_commands=shell help
 [alias]
 list=synopsis
 help2=help help
@@ -108,6 +111,7 @@ EOF
     print {$ft} <<EOF;
 parm1=1771
 parm2=7171
+default_commands=shell help
 [alias]
 list=synopsis
 help2=help help
@@ -147,6 +151,7 @@ EOF
     print {$ft} <<EOF;
 parm1=1771
 parm2=7171
+default_commands=shell help
 [alias]
 list=synopsis
 help2=help help

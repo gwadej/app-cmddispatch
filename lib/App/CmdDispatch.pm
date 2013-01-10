@@ -36,24 +36,7 @@ sub new
     }
     $aliases = {} unless ref $aliases eq ref {};
 
-    $commands = {
-        $LONG_HELP => {
-            code     => \&App::CmdDispatch::help,
-            synopsis => "$LONG_HELP [command|alias]",
-            help => "Display help about commands and/or aliases. Limit display with the\nargument.",
-        },
-        $SHORT_HELP => {
-            code     => \&App::CmdDispatch::synopsis,
-            synopsis => "$SHORT_HELP [command|alias]",
-            help => 'A list of commands and/or aliases. Limit display with the argument.',
-        },
-        shell => {
-            code     => \&App::CmdDispatch::shell,
-            synopsis => 'shell',
-            help     => 'Execute commands as entered until quit.',
-        },
-        %{ $commands },
-    };
+    $commands = $self->_setup_commands( $commands );
     my $table = App::CmdDispatch::Table->new( $commands, $aliases );
     $self->_normalize_help( $table );
 
@@ -282,6 +265,43 @@ sub _initialize_config
     return;
 }
 
+sub _setup_commands
+{
+    my( $self, $commands ) = @_;
+
+    return $commands unless $self->{config}->{default_commands};
+
+    foreach my $def ( split / /, $self->{config}->{default_commands} )
+    {
+        if( $def eq 'shell' )
+        {
+            $commands->{shell} = {
+                code     => \&App::CmdDispatch::shell,
+                synopsis => 'shell',
+                help     => 'Execute commands as entered until quit.',
+            };
+        }
+        elsif( $def eq 'help' )
+        {
+            $commands->{$LONG_HELP} = {
+                code     => \&App::CmdDispatch::help,
+                synopsis => "$LONG_HELP [command|alias]",
+                help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+            };
+            $commands->{$SHORT_HELP} = {
+                code     => \&App::CmdDispatch::synopsis,
+                synopsis => "$SHORT_HELP [command|alias]",
+                help => 'A list of commands and/or aliases. Limit display with the argument.',
+            };
+        }
+        else
+        {
+            die "Unrecognized default command: '$def'\n";
+        }
+    }
+    return $commands;
+}
+
 sub _normalize_help
 {
     my ( $self, $table ) = @_;
@@ -362,6 +382,21 @@ Create a new C<App::CmdDispatch> object. This method can take one or two
 hashrefs as arguments. The first is required and describes the commands.
 The second is optional and provides option information for the
 C<App::CmdDispatch> object.
+
+=head3 The $options hash
+
+This hash determines some of the default behavior of the C<App::CmdDispatch>
+object.
+
+=over 4
+
+=item config_file
+
+=item default_commands
+
+=item io
+
+=back
 
 =head2 run( $cmd, @args )
 
