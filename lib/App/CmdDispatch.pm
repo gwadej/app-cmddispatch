@@ -32,8 +32,8 @@ sub new
     {
         die "Supplied config is not a file.\n" unless -f $config_file;
         $self->_initialize_config( $config_file );
-        $aliases = delete $self->{config}->{alias};
     }
+    $aliases = delete $self->{config}->{alias};
     $aliases = {} unless ref $aliases eq ref {};
 
     $commands = $self->_setup_commands( $commands );
@@ -123,6 +123,10 @@ sub synopsis
     {
         $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
     }
+    elsif( $self->{table}->get_alias( $arg ) )
+    {
+        $self->_print( "\n$arg\t: ", $self->{table}->get_alias( $arg ), "\n" );
+    }
     elsif( $arg eq 'commands' )
     {
         $self->_list_command( sub { $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n"; } );
@@ -165,6 +169,14 @@ sub help
                     || $HELP_INDENT . "No synopsis for '$arg'"
             ),
             "\n"
+        );
+    }
+    elsif( $self->{table}->get_alias( $arg ) )
+    {
+        $self->_print(
+            "\n$arg\t: ",
+            $self->{table}->get_alias( $arg ),
+            "\n",
         );
     }
     elsif( $arg eq 'commands' )

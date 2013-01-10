@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 10;
+use Test::More tests => 19;
 
 use strict;
 use warnings;
@@ -160,5 +160,123 @@ EOF
     $io->clear;
     $app->help( 'aliases' );
     is( $io->output, '', "$label: 'aliases' supplied to help, with no aliases" );
+}
+
+{
+    my $label = 'Single command, all supplied, with alias';
+    my $io = Test::IO->new();
+    my $app = App::CmdDispatch->new(
+        {
+            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
+        },
+        { io => $io, default_commands => 'shell help', alias => { help2 => 'help help' } }
+    );
+
+    $app->help;
+    is( $io->output, <<EOF, "$label: Default man supplied" );
+
+Commands:
+  noop [n]
+        Does nothing, n times.
+  shell
+        Execute commands as entered until quit.
+  synopsis [command|alias]
+        A list of commands and/or aliases. Limit display with the argument.
+  help [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+
+Aliases:
+  help2\t: help help
+EOF
+
+    $io->clear;
+    $app->help( undef );
+    is( $io->output, <<EOF, "$label: undef supplied to synopsis" );
+
+Commands:
+  noop [n]
+        Does nothing, n times.
+  shell
+        Execute commands as entered until quit.
+  synopsis [command|alias]
+        A list of commands and/or aliases. Limit display with the argument.
+  help [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+
+Aliases:
+  help2\t: help help
+EOF
+
+    $io->clear;
+    $app->help( '' );
+    is( $io->output, <<EOF, "$label: empty string supplied to synopsis" );
+
+Commands:
+  noop [n]
+        Does nothing, n times.
+  shell
+        Execute commands as entered until quit.
+  synopsis [command|alias]
+        A list of commands and/or aliases. Limit display with the argument.
+  help [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+
+Aliases:
+  help2\t: help help
+EOF
+
+    $io->clear;
+    $app->help( 0 );
+    is( $io->output, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
+
+    $io->clear;
+    $app->help( 'noop' );
+    is( $io->output, <<EOF, "$label: command supplied to synopsis" );
+
+noop [n]
+        Does nothing, n times.
+EOF
+
+    $io->clear;
+    $app->help( 'help' );
+    is( $io->output, <<EOF, "$label: help supplied to help" );
+
+help [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+EOF
+
+    $io->clear;
+    $app->help( 'commands' );
+    is( $io->output, <<EOF, "$label: 'commands' supplied to help" );
+
+Commands:
+  noop [n]
+        Does nothing, n times.
+  shell
+        Execute commands as entered until quit.
+  synopsis [command|alias]
+        A list of commands and/or aliases. Limit display with the argument.
+  help [command|alias]
+        Display help about commands and/or aliases. Limit display with the
+        argument.
+EOF
+
+    $io->clear;
+    $app->help( 'aliases' );
+    is( $io->output, <<EOF, "$label: help request on aliases" );
+
+Aliases:
+  help2\t: help help
+EOF
+    $io->clear;
+    $app->help( 'help2' );
+    is( $io->output, <<EOF, "$label: 'aliases' supplied to help, with no aliases" );
+
+help2\t: help help
+EOF
 }
 
