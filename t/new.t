@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 19;
+use Test::More 'no_plan'; #tests => 19;
 
 use strict;
 use warnings;
@@ -22,7 +22,37 @@ use App::CmdDispatch;
     );
     isa_ok( $app, 'App::CmdDispatch' );
 
-    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and man found";
+    is_deeply [ $app->command_list() ], [qw/noop/], "$label: noop found";
+
+    $app->synopsis;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
+
+Commands:
+  noop
+EOF
+
+    $io->clear;
+    $app->help;
+    is( $io->output, <<EOF, "$label: Default help supplied" );
+
+Commands:
+  noop
+
+EOF
+}
+
+{
+    my $label = 'Single command, handler only';
+    my $io = Test::IO->new();
+    my $app = App::CmdDispatch->new(
+        {
+            noop => { code => sub {} },
+        },
+        { io => $io, default_commands => 'shell help' }
+    );
+    isa_ok( $app, 'App::CmdDispatch' );
+
+    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
 
     $app->synopsis;
     is( $io->output, <<EOF, "$label: Default help supplied" );
@@ -61,16 +91,13 @@ EOF
         { io => $io }
     );
 
-    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
+    is_deeply [ $app->command_list() ], [qw/noop/], "$label: noop found";
 
     $app->synopsis;
     is( $io->output, <<EOF, "$label: Synopsis as supplied" );
 
 Commands:
   noop [n]
-  shell
-  synopsis [command|alias]
-  help [command|alias]
 EOF
 
     $io->clear;
@@ -80,13 +107,6 @@ EOF
 Commands:
   noop [n]
 
-  shell
-        Execute commands as entered until quit.
-  synopsis [command|alias]
-        A list of commands and/or aliases. Limit display with the argument.
-  help [command|alias]
-        Display help about commands and/or aliases. Limit display with the
-        argument.
 EOF
 }
 
@@ -100,50 +120,39 @@ EOF
         { io => $io }
     );
 
-    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
+    is_deeply [ $app->command_list() ], [qw/noop/], "$label: noop found";
 
     $app->synopsis;
-    is( $io->output, <<EOF, "$label: Help as supplied" );
+    is( $io->output, <<EOF, "$label: synopsis as supplied" );
 
 Commands:
   noop [n]
-  shell
-  synopsis [command|alias]
-  help [command|alias]
 EOF
 
     $io->clear;
     $app->help;
-    is( $io->output, <<EOF, "$label: Default help supplied" );
+    is( $io->output, <<EOF, "$label: help supplied" );
 
 Commands:
   noop [n]
         Does nothing, n times.
-  shell
-        Execute commands as entered until quit.
-  synopsis [command|alias]
-        A list of commands and/or aliases. Limit display with the argument.
-  help [command|alias]
-        Display help about commands and/or aliases. Limit display with the
-        argument.
 EOF
 }
 
 {
-    my $label = 'Single command, remove shell';
+    my $label = 'Single command, add help default';
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-            shell => undef,
         },
-        { io => $io }
+        { io => $io, default_commands => 'help' }
     );
 
-    is_deeply [ $app->command_list() ], [qw/noop synopsis help/], "$label: shell has been removed";
+    is_deeply [ $app->command_list() ], [qw/noop synopsis help/], "$label: help commands added";
 
     $app->synopsis;
-    is( $io->output, <<EOF, "$label: shell removed from help" );
+    is( $io->output, <<EOF, "$label: Only help defaults added" );
 
 Commands:
   noop
@@ -167,28 +176,16 @@ EOF
 }
 
 {
-    my $label = 'Single command, remove synopsis';
+    my $label = 'Single command, add shell default';
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-            synopsis => undef,
-        }
+        },
+        { default_commands => 'shell' }
     );
 
     # Using private method for testing.
-    is_deeply [ $app->command_list() ], [qw/noop shell help/], "$label: synopsis has been removed";
-}
-
-{
-    my $label = 'Single command, remove help';
-    my $app = App::CmdDispatch->new(
-        {
-            noop => { code => sub {} },
-            help => undef,
-        }
-    );
-
-    is_deeply [ $app->command_list() ], [qw/noop shell synopsis/], "$label: help has been removed";
+    is_deeply [ $app->command_list() ], [qw/noop shell/], "$label: only shell added";
 }
 
 {
@@ -203,7 +200,7 @@ EOF
         { io => $io }
     );
 
-    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: synopsis still there";
+    is_deeply [ $app->command_list() ], [qw/noop synopsis/], "$label: synopsis still there";
 
     is( $called, 0, "$label: No calls made" );
     $app->run( 'synopsis' );
@@ -215,12 +212,7 @@ EOF
 Commands:
   noop
 
-  shell
-        Execute commands as entered until quit.
   synopsis
         Replaced synopsis
-  help [command|alias]
-        Display help about commands and/or aliases. Limit display with the
-        argument.
 EOF
 }

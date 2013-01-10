@@ -17,7 +17,7 @@ use App::CmdDispatch;
         {
             noop => { code => sub {} },
         },
-        { io => $io }
+        { io => $io, default_commands => 'help shell' }
     );
 
     $app->run();
@@ -38,7 +38,7 @@ EOF
         {
             noop => { code => sub {} },
         },
-        { io => $io }
+        { io => $io, default_commands => 'help shell' }
     );
 
     $app->run( '' );
@@ -59,7 +59,7 @@ EOF
         {
             noop => { code => sub {} },
         },
-        { io => $io }
+        { io => $io, default_commands => 'help shell' }
     );
 
     $app->run( 'synopsis' );
@@ -79,7 +79,7 @@ EOF
         {
             noop => { code => sub {} },
         },
-        { io => $io }
+        { io => $io, default_commands => 'help shell' }
     );
 
     $app->run( 'foo' );

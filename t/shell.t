@@ -16,7 +16,7 @@ sub shell_is ($$$)
 
     $input .= "\nquit\n" unless $input =~ /\bquit\b/;
     my $io = Test::IO->new( $input );
-    my $app = App::CmdDispatch->new( { noop => { code=> sub {} } }, { io => $io } );
+    my $app = App::CmdDispatch->new( { noop => { code=> sub {} } }, { io => $io, default_commands => 'shell help' } );
 
     my $actual;
     $app->shell;

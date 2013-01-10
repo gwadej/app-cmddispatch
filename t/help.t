@@ -18,7 +18,7 @@ use App::CmdDispatch;
         {
             noop => { code => sub {} },
         },
-        { io => $io }
+        { io => $io, default_commands => 'shell help' }
     );
 
     $app->help;
@@ -44,7 +44,7 @@ EOF
         {
             noop => { code => sub {}, synopsis => 'noop [n]' },
         },
-        { io => $io }
+        { io => $io, default_commands => 'shell help' }
     );
 
     $app->help;
@@ -70,7 +70,7 @@ EOF
         {
             noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
         },
-        { io => $io }
+        { io => $io, default_commands => 'shell help' }
     );
 
     $app->help;
