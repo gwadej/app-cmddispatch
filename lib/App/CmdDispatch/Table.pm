@@ -118,6 +118,8 @@ sub has_aliases
 1;
 __END__
 
+=encoding utf-8
+
 =head1 NAME
 
 App::CmdDispatch::Table - Dispatch table with support for aliases.
@@ -147,19 +149,40 @@ the alias maps to.
 
 =head2 run( $cmd, @args )
 
+Given a command string (or possibly an alias) and a set of arguments, execute
+the associated code.
+
 =head2 command_list()
+
+Return the list of commands in sorted order. This is basically the keys of the
+dispatch table.
 
 =head2 get_command( $cmd )
 
+Return the hash that represents the the supplied command.
+
 =head2 alias_list()
+
+Return a sorted list of the aliases in this table.
 
 =head2 get_alias( $alias )
 
+Return the string that the supplied alias maps to.
+
 =head2 has_aliases()
+
+Returns a true value if the table has any aliases, otherwise it returns a false
+value.
 
 =head2 MissingCommand()
 
+This class method returns the string that is thrown if run() is called with no
+command.
+
 =head2 UnknownCommand()
+
+This class method returns the string that is thrown if run() is called with a
+command or alias that is not known.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
@@ -183,7 +206,7 @@ G. Wade Johnson  C<< wade@anomaly.org >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2012, G. Wade Johnson C<< wade@anomaly.org >>. All rights reserved.
+Copyright (c) 2013, G. Wade Johnson C<< wade@anomaly.org >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

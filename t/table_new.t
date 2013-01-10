@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 17;
+use Test::More tests => 20;
 
 use strict;
 use warnings;
