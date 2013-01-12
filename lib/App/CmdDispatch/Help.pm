@@ -5,30 +5,60 @@ use strict;
 
 our $VERSION = '0.004_03';
 
-my $CMD_INDENT  = '  ';
-my $HELP_INDENT = '        ';
-
 sub new
 {
     my ($class, $owner, $commands, $config) = @_;
+    die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
+    die "No commands specified.\n"               unless keys %{$commands};
+    die "Config parameter is not a hashref.\n"   unless $config and ref $config  eq ref {};
+    die "Invalid owner object.\n" unless eval { $owner->isa( 'App::CmdDispatch' ); };
     _extend_table_with_help( $commands );
-    return bless { owner => $owner }, $class;
+    my %conf = (
+        indent_hint => '  ',
+        indent_help => '        ',
+        _extract_config_parm( $config, 'indent_hint' ),
+        _extract_config_parm( $config, 'pre_hint' ),
+        _extract_config_parm( $config, 'post_hint' ),
+        _extract_config_parm( $config, 'indent_help' ),
+        _extract_config_parm( $config, 'pre_help' ),
+        _extract_config_parm( $config, 'post_help' ),
+    );
+    return bless { owner => $owner, %conf }, $class;
+}
+
+sub _extract_config_parm
+{
+    my ($config, $parm) = @_;
+    return unless defined $config->{"help:$parm"};
+    return ($parm => $config->{"help:$parm"});
 }
 
 sub _extend_table_with_help
 {
     my ( $commands ) = @_;
     $commands->{help} = {
-        code     => \&App::CmdDispatch::Help::help,
+        code     => \&_dispatch_help,
         synopsis => "help [command|alias]",
         help => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $commands->{hint} = {
-        code     => \&App::CmdDispatch::Help::hint,
+        code     => \&_dispatch_hint,
         synopsis => "hint [command|alias]",
         help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     return;
+}
+
+sub _dispatch_help
+{
+    my $owner = shift;
+    return $owner->{_helper}->help( @_ );
+}
+
+sub _dispatch_hint
+{
+    my $owner = shift;
+    return $owner->{_helper}->hint( @_ );
 }
 
 sub _hint_string
@@ -43,7 +73,7 @@ sub _help_string
     my ( $self, $cmd ) = @_;
     my $desc = $self->_table->get_command( $cmd );
     return '' unless defined $desc;
-    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $desc->{help} );
+    return join( "\n", map { $self->{indent_help} . $_ } split /\n/, $desc->{help} );
 }
 
 sub _list_command
@@ -66,7 +96,7 @@ sub _list_aliases
     $self->_print( "\nAliases:\n" );
     foreach my $c ( $self->{owner}->alias_list() )
     {
-        $self->_print( "$CMD_INDENT$c\t: " . $self->_table->get_alias( $c ) . "\n" );
+        $self->_print( "$self->{indent_hint}$c\t: " . $self->_table->get_alias( $c ) . "\n" );
     }
     return;
 }
@@ -76,15 +106,13 @@ sub _is_missing { return !defined $_[0] || $_[0] eq ''; }
 sub hint
 {
     my ( $self, $arg ) = @_;
-    if( ref $self ne __PACKAGE__ )
-    {
-        $self = $self->{_helper};
-    }
 
     if( _is_missing( $arg ) )
     {
-        $self->_list_command( sub { $CMD_INDENT, $self->_hint_string( $_[0] ), "\n"; } );
+        $self->_print( "\n$self->{pre_hint}\n" ) if $self->{pre_hint};
+        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n"; } );
         $self->_list_aliases();
+        $self->_print( "\n$self->{post_hint}\n" ) if $self->{post_hint};
         return;
     }
 
@@ -98,7 +126,7 @@ sub hint
     }
     elsif( $arg eq 'commands' )
     {
-        $self->_list_command( sub { $CMD_INDENT, $self->_hint_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n"; } );
     }
     elsif( $arg eq 'aliases' )
     {
@@ -115,19 +143,17 @@ sub hint
 sub help
 {
     my ( $self, $arg ) = @_;
-    if( ref $self ne __PACKAGE__ )
-    {
-        $self = $self->{_helper};
-    }
 
     if( _is_missing( $arg ) )
     {
+        $self->_print( "\n$self->{pre_help}\n" ) if $self->{pre_help};
         $self->_list_command(
             sub {
-                $CMD_INDENT, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
             }
         );
         $self->_list_aliases();
+        $self->_print( "\n$self->{post_help}\n" ) if $self->{post_help};
         return;
     }
 
@@ -139,7 +165,7 @@ sub help
             "\n",
             (
                 $self->_help_string( $arg )
-                    || $HELP_INDENT . "No hint for '$arg'"
+                    || $self->{indent_help} . "No hint for '$arg'"
             ),
             "\n"
         );
@@ -156,7 +182,7 @@ sub help
     {
         $self->_list_command(
             sub {
-                $CMD_INDENT, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
             }
         );
     }
@@ -172,14 +198,6 @@ sub help
     return;
 }
 
-sub _do_hint
-{
-    my ($self) = @_;
-    my $desc = $self->_table->get_command( 'hint' );
-    return $desc->{code}->( $self ) if $desc;
-    return $self->hint();
-}
-
 sub normalize_command_help
 {
     my ( $self, $table ) = @_;
@@ -190,6 +208,11 @@ sub normalize_command_help
         $desc->{help}     = ''   unless defined $desc->{help};
     }
     return;
+}
+
+sub sort_commands
+{
+    return ( sort grep { $_ ne 'hint' && $_ ne 'help' } @_ ), 'hint', 'help';
 }
 
 sub _print
@@ -222,8 +245,8 @@ This document describes App::CmdDispatch::Help version 0.004_03.3
     Brief code example(s) here showing commonest usage(s).
     This section will be as far as many users bother reading
     so make it as educational and exeplary as possible.
-  
-  
+
+
 =head1 DESCRIPTION
 
 =for author to fill in:
@@ -231,11 +254,9 @@ This document describes App::CmdDispatch::Help version 0.004_03.3
     Use subsections (=head2, =head3) as appropriate.
 
 
-=head1 INTERFACE 
+=head1 INTERFACE
 
 =head2 new()
-
-=head2 normalize_command_help( $table )
 
 =head2 hint( $dispatch, $cmd )
 
@@ -245,6 +266,10 @@ for the supplied command.
 =head2 help( $dispatch, $cmd )
 
 Print help for the program or just help on the supplied command.
+
+=head2 normalize_command_help( $table )
+
+=head2 sort_commands( @cmds )
 
 =head1 DIAGNOSTICS
 
@@ -277,7 +302,7 @@ Print help for the program or just help on the supplied command.
     files, and the meaning of any environment variables or properties
     that can be set. These descriptions must also include details of any
     configuration language used.
-  
+
 App::CmdDispatch::Help requires no configuration files or environment variables.
 
 

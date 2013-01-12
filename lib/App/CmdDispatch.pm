@@ -9,12 +9,6 @@ use App::CmdDispatch::Table;
 
 our $VERSION = '0.004_03';
 
-my $CMD_INDENT  = '  ';
-my $HELP_INDENT = '        ';
-
-my $SHORT_HELP = 'hint';
-my $LONG_HELP  = 'help';
-
 sub new
 {
     my ( $class, $commands, $options ) = @_;
@@ -28,6 +22,8 @@ sub new
     my $config_file = delete $options->{config};
     my $aliases;
     my $self = bless { config => $options }, $class;
+    $self->{_command_sorter} = delete $self->{config}->{command_sort}
+        if $self->{config}->{command_sort} && 'CODE' eq ref $self->{config}->{command_sort};
     if( defined $config_file )
     {
         die "Supplied config is not a file.\n" unless -f $config_file;
@@ -42,9 +38,11 @@ sub new
     if ( $self->{_helper} )
     {
         $self->{_helper}->normalize_command_help( $table );
+        $self->{_command_sorter} ||= (ref $self->{_helper})->can( "sort_commands" );
     }
     $self->{table} = $table;
     $self->_initialize_io_object();
+    $self->{_command_sorter} ||= sub { return ( sort @_ ); };
 
     return $self;
 }
@@ -81,8 +79,7 @@ sub run
 sub command_list
 {
     my ( $self ) = @_;
-    my @cmds = $self->{table}->command_list();
-    return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } @cmds ), grep { $self->{table}->get_command( $_ ) } ($SHORT_HELP, $LONG_HELP);
+    return $self->{_command_sorter}->( $self->{table}->command_list() );
 }
 
 sub command_hint
@@ -165,20 +162,24 @@ sub _initialize_io_object
     my ($self) = @_;
 
     my $io = delete $self->{config}->{'io'};
-    if($io)
-    {
-        if(ref $io and 2 != grep { $io->can( $_ ) } qw/print prompt/)
-        {
-            die "Object supplied as io parameter does not supply correct interface.\n";
-        }
-    }
-    else
+    if(!defined $io)
     {
         $io = App::CmdDispatch::IO->new();
+    }
+    elsif( !_is_valid_io_object( $io ) )
+    {
+        die "Object supplied as io parameter does not supply correct interface.\n";
     }
 
     $self->{io} = $io;
     return;
+}
+
+sub _is_valid_io_object
+{
+    my ($io) = @_;
+    return unless ref $io;
+    return 2 == grep { $io->can( $_ ) } qw/print prompt/;
 }
 
 sub _setup_commands
@@ -201,7 +202,7 @@ sub _setup_commands
         elsif( $def eq 'help' )
         {
             require App::CmdDispatch::Help;
-            $self->{_helper} = App::CmdDispatch::Help->new( $self, $commands );
+            $self->{_helper} = App::CmdDispatch::Help->new( $self, $commands, $self->{config} );
         }
         else
         {
@@ -271,7 +272,7 @@ containing a code reference and a pair of help strings.
 Since beginning to use git, I have found git's alias feature to be extremely
 helpful. App::CmdDispatch supports reading aliases from a config file.
 
-=head1 INTERFACE 
+=head1 INTERFACE
 
 =head2 new( $cmdhash, $options )
 
@@ -292,6 +293,18 @@ object.
 =item default_commands
 
 =item io
+
+=item help:indent_hint
+
+=item help:pre_hint
+
+=item help:post_hint
+
+=item help:indent_help
+
+=item help:pre_help
+
+=item help:post_help
 
 =back
 
