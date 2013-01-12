@@ -86,7 +86,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, hint => 'noop [n]' },
+            noop => { code => sub {}, synopsis => 'noop [n]' },
         },
         { io => $io }
     );
@@ -115,7 +115,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, hint => 'noop [n]', help => 'Does nothing, n times.' },
+            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
         },
         { io => $io }
     );
@@ -195,7 +195,7 @@ EOF
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-            hint => { code => sub { ++$called; }, hint => 'hint', help => 'Replaced hint' },
+            hint => { code => sub { ++$called; }, synopsis => 'hint', help => 'Replaced hint' },
         },
         { io => $io }
     );

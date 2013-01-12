@@ -12,7 +12,7 @@ our $VERSION = '0.004_02';
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
 
-my $SHORT_HELP = 'synopsis';
+my $SHORT_HELP = 'hint';
 my $LONG_HELP  = 'help';
 
 sub new
@@ -59,12 +59,12 @@ sub run
         if( $ex eq App::CmdDispatch::Table::MissingCommand() )
         {
             $self->_print( "Missing command\n" );
-            $self->synopsis;
+            $self->hint;
         }
         elsif( $ex eq App::CmdDispatch::Table::UnknownCommand() )
         {
             $self->_print( "Unrecognized command '$cmd'\n" );
-            $self->synopsis;
+            $self->hint;
         }
         else
         {
@@ -81,7 +81,7 @@ sub command_list
     return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } @cmds ), grep { $self->{table}->get_command( $_ ) } ($SHORT_HELP, $LONG_HELP);
 }
 
-sub _synopsis_string
+sub _hint_string
 {
     my ( $self, $cmd ) = @_;
     my $desc = $self->{table}->get_command( $cmd );
@@ -108,20 +108,20 @@ sub _list_command
     return;
 }
 
-sub synopsis
+sub hint
 {
     my ( $self, $arg ) = @_;
 
     if( _is_missing( $arg ) )
     {
-        $self->_list_command( sub { $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $CMD_INDENT, $self->_hint_string( $_[0] ), "\n"; } );
         $self->_list_aliases();
         return;
     }
 
     if( $self->{table}->get_command( $arg ) )
     {
-        $self->_print( "\n", $self->_synopsis_string( $arg ), "\n" );
+        $self->_print( "\n", $self->_hint_string( $arg ), "\n" );
     }
     elsif( $self->{table}->get_alias( $arg ) )
     {
@@ -129,7 +129,7 @@ sub synopsis
     }
     elsif( $arg eq 'commands' )
     {
-        $self->_list_command( sub { $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $CMD_INDENT, $self->_hint_string( $_[0] ), "\n"; } );
     }
     elsif( $arg eq 'aliases' )
     {
@@ -151,7 +151,7 @@ sub help
     {
         $self->_list_command(
             sub {
-                $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $CMD_INDENT, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
             }
         );
         $self->_list_aliases();
@@ -162,11 +162,11 @@ sub help
     {
         $self->_print(
             "\n",
-            $self->_synopsis_string( $arg ),
+            $self->_hint_string( $arg ),
             "\n",
             (
                 $self->_help_string( $arg )
-                    || $HELP_INDENT . "No synopsis for '$arg'"
+                    || $HELP_INDENT . "No hint for '$arg'"
             ),
             "\n"
         );
@@ -183,7 +183,7 @@ sub help
     {
         $self->_list_command(
             sub {
-                $CMD_INDENT, $self->_synopsis_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $CMD_INDENT, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
             }
         );
     }
@@ -199,12 +199,12 @@ sub help
     return;
 }
 
-sub _do_synopsis
+sub _do_hint
 {
     my ($self) = @_;
     my $desc = $self->{table}->get_command( $SHORT_HELP );
     return $desc->{code}->( $self ) if $desc;
-    return $self->synopsis();
+    return $self->hint();
 }
 
 sub alias_list { return $_[0]->{table}->alias_list(); }
@@ -309,7 +309,7 @@ sub _setup_commands
                 help => "Display help about commands and/or aliases. Limit display with the\nargument.",
             };
             $commands->{$SHORT_HELP} = {
-                code     => \&App::CmdDispatch::synopsis,
+                code     => \&App::CmdDispatch::hint,
                 synopsis => "$SHORT_HELP [command|alias]",
                 help => 'A list of commands and/or aliases. Limit display with the argument.',
             };
@@ -422,9 +422,9 @@ object.
 
 Look up the supplied command and execute it.
 
-=head2 synopsis( $cmd )
+=head2 hint( $cmd )
 
-Print a short synopsis listing all commands and aliases or just the synopsis
+Print a short hint listing all commands and aliases or just the hint
 for the supplied command.
 
 =head2 help( $cmd )

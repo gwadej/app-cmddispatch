@@ -42,7 +42,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, hint => 'noop [n]' },
+            noop => { code => sub {}, synopsis => 'noop [n]' },
         },
         { io => $io, default_commands => 'shell help' }
     );
@@ -68,7 +68,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, hint => 'noop [n]', help => 'Does nothing, n times.' },
+            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
         },
         { io => $io, default_commands => 'shell help' }
     );
@@ -167,7 +167,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, hint => 'noop [n]', help => 'Does nothing, n times.' },
+            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
         },
         { io => $io, default_commands => 'shell help', alias => { help2 => 'help help' } }
     );
