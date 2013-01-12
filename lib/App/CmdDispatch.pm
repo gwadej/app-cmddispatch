@@ -7,7 +7,7 @@ use Term::ReadLine;
 use App::CmdDispatch::IO;
 use App::CmdDispatch::Table;
 
-our $VERSION = '0.004_02';
+our $VERSION = '0.004_03';
 
 my $CMD_INDENT  = '  ';
 my $HELP_INDENT = '        ';
@@ -37,8 +37,12 @@ sub new
     $aliases = {} unless ref $aliases eq ref {};
 
     $commands = $self->_setup_commands( $commands );
+    # TODO - replace the hard-coded Table module name with a parameter.
     my $table = App::CmdDispatch::Table->new( $commands, $aliases );
-    $self->_normalize_help( $table );
+    if ( $self->{_helper} )
+    {
+        $self->{_helper}->normalize_command_help( $table );
+    }
     $self->{table} = $table;
     $self->_initialize_io_object();
 
@@ -59,12 +63,12 @@ sub run
         if( $ex eq App::CmdDispatch::Table::MissingCommand() )
         {
             $self->_print( "Missing command\n" );
-            $self->hint;
+            $self->command_hint;
         }
         elsif( $ex eq App::CmdDispatch::Table::UnknownCommand() )
         {
             $self->_print( "Unrecognized command '$cmd'\n" );
-            $self->hint;
+            $self->command_hint;
         }
         else
         {
@@ -81,146 +85,41 @@ sub command_list
     return ( sort grep { $_ ne $SHORT_HELP && $_ ne $LONG_HELP } @cmds ), grep { $self->{table}->get_command( $_ ) } ($SHORT_HELP, $LONG_HELP);
 }
 
-sub _hint_string
+sub command_hint
 {
-    my ( $self, $cmd ) = @_;
-    my $desc = $self->{table}->get_command( $cmd );
-    return $desc ? $desc->{synopsis} : $desc;
-}
-
-sub _help_string
-{
-    my ( $self, $cmd ) = @_;
-    my $desc = $self->{table}->get_command( $cmd );
-    return '' unless defined $desc;
-    return join( "\n", map { $HELP_INDENT . $_ } split /\n/, $desc->{help} );
-}
-
-sub _list_command
-{
-    my ( $self, $code ) = @_;
-    $self->_print( "\nCommands:\n" );
-    foreach my $c ( $self->command_list() )
-    {
-        next if $c eq '' or !$self->{table}->get_command( $c );
-        $self->_print( $code->( $c ) );
-    }
+    my ($self) = @_;
+    return $self->{_helper}->hint() if defined $self->{_helper};
+    $self->_print( "Commands: ", join( ', ', $self->command_list() ), "\n" );
     return;
 }
 
 sub hint
 {
-    my ( $self, $arg ) = @_;
-
-    if( _is_missing( $arg ) )
-    {
-        $self->_list_command( sub { $CMD_INDENT, $self->_hint_string( $_[0] ), "\n"; } );
-        $self->_list_aliases();
-        return;
-    }
-
-    if( $self->{table}->get_command( $arg ) )
-    {
-        $self->_print( "\n", $self->_hint_string( $arg ), "\n" );
-    }
-    elsif( $self->{table}->get_alias( $arg ) )
-    {
-        $self->_print( "\n$arg\t: ", $self->{table}->get_alias( $arg ), "\n" );
-    }
-    elsif( $arg eq 'commands' )
-    {
-        $self->_list_command( sub { $CMD_INDENT, $self->_hint_string( $_[0] ), "\n"; } );
-    }
-    elsif( $arg eq 'aliases' )
-    {
-        $self->_list_aliases();
-    }
-    else
-    {
-        $self->_print( "Unrecognized command '$arg'\n" );
-    }
-
+    my ($self, $arg) = @_;
+    eval {
+        $self->run( 'hint', $arg );
+        1;
+    } or do {
+        return $self->{_helper}->hint( $arg ) if defined $self->{_helper};
+        $self->_print( "Commands: ", join( ', ', $self->command_list() ), "\n" );
+    };
     return;
 }
 
 sub help
 {
-    my ( $self, $arg ) = @_;
-
-    if( _is_missing( $arg ) )
-    {
-        $self->_list_command(
-            sub {
-                $CMD_INDENT, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
-            }
-        );
-        $self->_list_aliases();
-        return;
-    }
-
-    if( $self->{table}->get_command( $arg ) )
-    {
-        $self->_print(
-            "\n",
-            $self->_hint_string( $arg ),
-            "\n",
-            (
-                $self->_help_string( $arg )
-                    || $HELP_INDENT . "No hint for '$arg'"
-            ),
-            "\n"
-        );
-    }
-    elsif( $self->{table}->get_alias( $arg ) )
-    {
-        $self->_print(
-            "\n$arg\t: ",
-            $self->{table}->get_alias( $arg ),
-            "\n",
-        );
-    }
-    elsif( $arg eq 'commands' )
-    {
-        $self->_list_command(
-            sub {
-                $CMD_INDENT, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
-            }
-        );
-    }
-    elsif( $arg eq 'aliases' )
-    {
-        $self->_list_aliases();
-    }
-    else
-    {
-        $self->_print( "Unrecognized command '$arg'\n" );
-    }
-
+    my ($self, $arg) = @_;
+    eval {
+        $self->run( 'help', $arg );
+        1;
+    } or do {
+        return $self->{_helper}->help( $arg ) if defined $self->{_helper};
+        $self->_print( "Commands: ", join( ', ', $self->command_list() ), "\n" );
+    };
     return;
-}
-
-sub _do_hint
-{
-    my ($self) = @_;
-    my $desc = $self->{table}->get_command( $SHORT_HELP );
-    return $desc->{code}->( $self ) if $desc;
-    return $self->hint();
 }
 
 sub alias_list { return $_[0]->{table}->alias_list(); }
-
-sub _list_aliases
-{
-    my ( $self ) = @_;
-    return unless $self->{table}->has_aliases;
-
-    $self->_print( "\nAliases:\n" );
-    foreach my $c ( $self->alias_list() )
-    {
-        $self->_print( "$CMD_INDENT$c\t: " . $self->{table}->get_alias( $c ) . "\n" );
-    }
-    return;
-}
 
 sub shell
 {
@@ -248,8 +147,6 @@ sub _prompt
     my $self = shift;
     return $self->{io}->prompt( @_ );
 }
-
-sub _is_missing { return !defined $_[0] || $_[0] eq ''; }
 
 sub _initialize_config
 {
@@ -303,16 +200,8 @@ sub _setup_commands
         }
         elsif( $def eq 'help' )
         {
-            $commands->{$LONG_HELP} = {
-                code     => \&App::CmdDispatch::help,
-                synopsis => "$LONG_HELP [command|alias]",
-                help => "Display help about commands and/or aliases. Limit display with the\nargument.",
-            };
-            $commands->{$SHORT_HELP} = {
-                code     => \&App::CmdDispatch::hint,
-                synopsis => "$SHORT_HELP [command|alias]",
-                help => 'A list of commands and/or aliases. Limit display with the argument.',
-            };
+            require App::CmdDispatch::Help;
+            $self->{_helper} = App::CmdDispatch::Help->new( $self, $commands );
         }
         else
         {
@@ -320,18 +209,6 @@ sub _setup_commands
         }
     }
     return $commands;
-}
-
-sub _normalize_help
-{
-    my ( $self, $table ) = @_;
-    foreach my $cmd ( $table->command_list )
-    {
-        my $desc = $table->get_command( $cmd );
-        $desc->{synopsis} = $cmd unless defined $desc->{synopsis};
-        $desc->{help}     = ''   unless defined $desc->{help};
-    }
-    return;
 }
 
 1;
@@ -346,7 +223,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::CmdDispatch version 0.004_01
+This document describes App::CmdDispatch version 0.004_03
 
 =head1 SYNOPSIS
 
@@ -421,6 +298,11 @@ object.
 =head2 run( $cmd, @args )
 
 Look up the supplied command and execute it.
+
+=head2 command_hint( $cmd )
+
+Print a short hint listing all commands and aliases or just the hint
+for the supplied command.
 
 =head2 hint( $cmd )
 
