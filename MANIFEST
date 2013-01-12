@@ -8,12 +8,15 @@ MANIFEST.SKIP
 MYMETA.yml
 README
 t/00.load.t
+t/config-bad.t
 t/config.t
 t/help.t
-t/lib/Test/CmdDispatch.pm
+t/hint.t
 t/lib/Test/IO.pm
 t/new-bad.t
 t/new.t
 t/run.t
 t/shell.t
-t/synopsis.t
+t/table_new-bad.t
+t/table_new.t
+t/table_run.t
