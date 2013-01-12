@@ -18,7 +18,7 @@ use App::CmdDispatch;
 parm1=1771
 parm2=7171
 [alias]
-list=synopsis
+list=hint
 help2=help help
 EOF
     close $ft;
@@ -36,7 +36,7 @@ parm1=1771
 parm2=7171
 default_commands=shell help
 [alias]
-list=synopsis
+list=hint
 help2=help help
 EOF
     close $ft;
@@ -45,7 +45,7 @@ EOF
     my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
     my $got = [ $app->command_list ];
-    is_deeply( $got, [ qw/noop shell synopsis help/ ], "Correct commands found.\n" )
+    is_deeply( $got, [ qw/noop shell hint help/ ], "Correct commands found.\n" )
         or note explain $got;
     $got = [ $app->alias_list ];
     is_deeply( $got, [ qw/help2 list/ ], "Correct aliases found.\n" )
@@ -59,7 +59,7 @@ parm1=1771
 parm2=7171
 default_commands=shell help
 [alias]
-list=synopsis
+list=hint
 help2=help help
 EOF
     close $ft;
@@ -73,12 +73,12 @@ EOF
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 
 Aliases:
   help2	: help help
-  list	: synopsis
+  list	: hint
 EOF
 }
 
@@ -89,7 +89,7 @@ parm1=1771
 parm2=7171
 default_commands=shell help
 [alias]
-list=synopsis
+list=hint
 help2=help help
 EOF
     close $ft;
@@ -113,7 +113,7 @@ parm1=1771
 parm2=7171
 default_commands=shell help
 [alias]
-list=synopsis
+list=hint
 help2=help help
 EOF
     close $ft;
@@ -129,7 +129,7 @@ Commands:
 
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -142,7 +142,7 @@ EOF
 
 Aliases:
   help2\t: help help
-  list\t: synopsis
+  list\t: hint
 EOF
 }
 
@@ -153,7 +153,7 @@ parm1=1771
 parm2=7171
 default_commands=shell help
 [alias]
-list=synopsis
+list=hint
 help2=help help
 EOF
     close $ft;
@@ -161,22 +161,22 @@ EOF
     my $io = Test::IO->new;
     my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
 
-    $app->run( qw/synopsis commands/ );
-    is( $io->output, <<EOF, 'Verify synopsis commands works' );
+    $app->run( qw/hint commands/ );
+    is( $io->output, <<EOF, 'Verify hint commands works' );
 
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 
     $io->clear;
-    $app->run( qw/synopsis aliases/ );
-    is( $io->output, <<EOF, 'Verify synopsis aliases' );
+    $app->run( qw/hint aliases/ );
+    is( $io->output, <<EOF, 'Verify hint aliases' );
 
 Aliases:
   help2\t: help help
-  list\t: synopsis
+  list\t: hint
 EOF
 }

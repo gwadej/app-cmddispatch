@@ -27,4 +27,4 @@ shell_is( "quit\n", "Enter a command or 'quit' to exit:\n> ", 'Immediately exit 
 
 shell_is( "\nquit\n", "Enter a command or 'quit' to exit:\n> > ", 'Handle blank lines' );
 
-shell_is( "synopsis\nquit\n", "Enter a command or 'quit' to exit:\n> \nCommands:\n  noop\n  shell\n  synopsis [command|alias]\n  help [command|alias]\n> ", 'Shell to help' );
+shell_is( "hint\nquit\n", "Enter a command or 'quit' to exit:\n> \nCommands:\n  noop\n  shell\n  hint [command|alias]\n  help [command|alias]\n> ", 'Shell to help' );

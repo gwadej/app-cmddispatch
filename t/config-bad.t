@@ -12,5 +12,15 @@ use lib "$FindBin::Bin/lib";
 use File::Temp;
 use App::CmdDispatch;
 
-throws_ok { App::CmdDispatch->new( { noop => { code => sub {} } }, { config => 'xyzzy' } ) }
-    qr/Supplied config is not a file./, 'Exception if supplied bad file name';
+throws_ok
+{
+    App::CmdDispatch->new(
+        {
+            noop => {
+                code => sub { }
+            }
+        },
+        { config => 'xyzzy' }
+    );
+}
+qr/Supplied config is not a file./, 'Exception if supplied bad file name';

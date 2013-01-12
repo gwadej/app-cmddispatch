@@ -29,7 +29,7 @@ Commands:
 
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -38,11 +38,11 @@ EOF
 }
 
 {
-    my $label = 'Single command, handler and synopsis';
+    my $label = 'Single command, handler and hint';
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, synopsis => 'noop [n]' },
+            noop => { code => sub {}, hint => 'noop [n]' },
         },
         { io => $io, default_commands => 'shell help' }
     );
@@ -55,7 +55,7 @@ Commands:
 
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -68,7 +68,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
+            noop => { code => sub {}, hint => 'noop [n]', help => 'Does nothing, n times.' },
         },
         { io => $io, default_commands => 'shell help' }
     );
@@ -81,7 +81,7 @@ Commands:
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -90,14 +90,14 @@ EOF
 
     $io->clear;
     $app->help( undef );
-    is( $io->output, <<EOF, "$label: undef supplied to synopsis" );
+    is( $io->output, <<EOF, "$label: undef supplied to hint" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -106,14 +106,14 @@ EOF
 
     $io->clear;
     $app->help( '' );
-    is( $io->output, <<EOF, "$label: empty string supplied to synopsis" );
+    is( $io->output, <<EOF, "$label: empty string supplied to hint" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -122,11 +122,11 @@ EOF
 
     $io->clear;
     $app->help( 0 );
-    is( $io->output, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
+    is( $io->output, "Unrecognized command '0'\n", "$label: zero supplied to hint" );
 
     $io->clear;
     $app->help( 'noop' );
-    is( $io->output, <<EOF, "$label: command supplied to synopsis" );
+    is( $io->output, <<EOF, "$label: command supplied to hint" );
 
 noop [n]
         Does nothing, n times.
@@ -150,7 +150,7 @@ Commands:
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -167,7 +167,7 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
+            noop => { code => sub {}, hint => 'noop [n]', help => 'Does nothing, n times.' },
         },
         { io => $io, default_commands => 'shell help', alias => { help2 => 'help help' } }
     );
@@ -180,7 +180,7 @@ Commands:
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -192,14 +192,14 @@ EOF
 
     $io->clear;
     $app->help( undef );
-    is( $io->output, <<EOF, "$label: undef supplied to synopsis" );
+    is( $io->output, <<EOF, "$label: undef supplied to hint" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -211,14 +211,14 @@ EOF
 
     $io->clear;
     $app->help( '' );
-    is( $io->output, <<EOF, "$label: empty string supplied to synopsis" );
+    is( $io->output, <<EOF, "$label: empty string supplied to hint" );
 
 Commands:
   noop [n]
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -230,11 +230,11 @@ EOF
 
     $io->clear;
     $app->help( 0 );
-    is( $io->output, "Unrecognized command '0'\n", "$label: zero supplied to synopsis" );
+    is( $io->output, "Unrecognized command '0'\n", "$label: zero supplied to hint" );
 
     $io->clear;
     $app->help( 'noop' );
-    is( $io->output, <<EOF, "$label: command supplied to synopsis" );
+    is( $io->output, <<EOF, "$label: command supplied to hint" );
 
 noop [n]
         Does nothing, n times.
@@ -258,7 +258,7 @@ Commands:
         Does nothing, n times.
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the

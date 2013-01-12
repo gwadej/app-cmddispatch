@@ -27,7 +27,7 @@ Missing command
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 }
@@ -48,7 +48,7 @@ Missing command
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 }
@@ -62,13 +62,13 @@ EOF
         { io => $io, default_commands => 'help shell' }
     );
 
-    $app->run( 'synopsis' );
+    $app->run( 'hint' );
     is( $io->output, <<EOF, "Synopsis command run successfully" );
 
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 }
@@ -89,7 +89,7 @@ Unrecognized command 'foo'
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 }

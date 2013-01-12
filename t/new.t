@@ -24,7 +24,7 @@ use App::CmdDispatch;
 
     is_deeply [ $app->command_list() ], [qw/noop/], "$label: noop found";
 
-    $app->synopsis;
+    $app->hint;
     is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
@@ -52,15 +52,15 @@ EOF
     );
     isa_ok( $app, 'App::CmdDispatch' );
 
-    is_deeply [ $app->command_list() ], [qw/noop shell synopsis help/], "$label: noop help and synopsis found";
+    is_deeply [ $app->command_list() ], [qw/noop shell hint help/], "$label: noop help and hint found";
 
-    $app->synopsis;
+    $app->hint;
     is( $io->output, <<EOF, "$label: Default help supplied" );
 
 Commands:
   noop
   shell
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 
@@ -73,7 +73,7 @@ Commands:
 
   shell
         Execute commands as entered until quit.
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -82,18 +82,18 @@ EOF
 }
 
 {
-    my $label = 'Single command, handler and synopsis';
+    my $label = 'Single command, handler and hint';
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, synopsis => 'noop [n]' },
+            noop => { code => sub {}, hint => 'noop [n]' },
         },
         { io => $io }
     );
 
     is_deeply [ $app->command_list() ], [qw/noop/], "$label: noop found";
 
-    $app->synopsis;
+    $app->hint;
     is( $io->output, <<EOF, "$label: Synopsis as supplied" );
 
 Commands:
@@ -115,15 +115,15 @@ EOF
     my $io = Test::IO->new();
     my $app = App::CmdDispatch->new(
         {
-            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
+            noop => { code => sub {}, hint => 'noop [n]', help => 'Does nothing, n times.' },
         },
         { io => $io }
     );
 
     is_deeply [ $app->command_list() ], [qw/noop/], "$label: noop found";
 
-    $app->synopsis;
-    is( $io->output, <<EOF, "$label: synopsis as supplied" );
+    $app->hint;
+    is( $io->output, <<EOF, "$label: hint as supplied" );
 
 Commands:
   noop [n]
@@ -149,14 +149,14 @@ EOF
         { io => $io, default_commands => 'help' }
     );
 
-    is_deeply [ $app->command_list() ], [qw/noop synopsis help/], "$label: help commands added";
+    is_deeply [ $app->command_list() ], [qw/noop hint help/], "$label: help commands added";
 
-    $app->synopsis;
+    $app->hint;
     is( $io->output, <<EOF, "$label: Only help defaults added" );
 
 Commands:
   noop
-  synopsis [command|alias]
+  hint [command|alias]
   help [command|alias]
 EOF
 
@@ -167,7 +167,7 @@ EOF
 Commands:
   noop
 
-  synopsis [command|alias]
+  hint [command|alias]
         A list of commands and/or aliases. Limit display with the argument.
   help [command|alias]
         Display help about commands and/or aliases. Limit display with the
@@ -189,30 +189,30 @@ EOF
 }
 
 {
-    my $label = 'Replace synopsis';
+    my $label = 'Replace hint';
     my $called = 0;
     my $io = Test::IO->new;
     my $app = App::CmdDispatch->new(
         {
             noop => { code => sub {} },
-            synopsis => { code => sub { ++$called; }, synopsis => 'synopsis', help => 'Replaced synopsis' },
+            hint => { code => sub { ++$called; }, hint => 'hint', help => 'Replaced hint' },
         },
         { io => $io }
     );
 
-    is_deeply [ $app->command_list() ], [qw/noop synopsis/], "$label: synopsis still there";
+    is_deeply [ $app->command_list() ], [qw/noop hint/], "$label: hint still there";
 
     is( $called, 0, "$label: No calls made" );
-    $app->run( 'synopsis' );
+    $app->run( 'hint' );
     is( $called, 1, "$label: Replacement code is called" );
 
     $app->help;
-    is( $io->output, <<EOF, "$label: synopsis strings replaced" );
+    is( $io->output, <<EOF, "$label: hint strings replaced" );
 
 Commands:
   noop
 
-  synopsis
-        Replaced synopsis
+  hint
+        Replaced hint
 EOF
 }
