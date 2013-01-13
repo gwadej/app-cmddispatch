@@ -73,7 +73,8 @@ sub _help_string
 {
     my ( $self, $cmd ) = @_;
     my $desc = $self->_table->get_command( $cmd );
-    return '' unless defined $desc;
+
+    return '' unless defined $desc->{help};
     return join( "\n", map { $self->{indent_help} . $_ } split /\n/, $desc->{help} );
 }
 
@@ -83,6 +84,8 @@ sub _list_command
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->{owner}->command_list() )
     {
+        # The following should not be possible. But I'll keep this until
+        # I'm absolutely certain.
         next if $c eq '' or !$self->_table->get_command( $c );
         $self->_print( $code->( $c ) );
     }
@@ -162,7 +165,7 @@ sub help
     if( $self->_table->get_command( $arg ) )
     {
         $self->_print( "\n", $self->_hint_string( $arg ),
-            "\n", ( $self->_help_string( $arg ) || $self->{indent_help} . "No hint for '$arg'" ),
+            "\n", ( $self->_help_string( $arg ) || $self->{indent_help} . "No help for '$arg'" ),
             "\n" );
     }
     elsif( $self->_table->get_alias( $arg ) )

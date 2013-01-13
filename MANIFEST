@@ -1,9 +1,9 @@
 Changes
 lib/App/CmdDispatch.pm
+lib/App/CmdDispatch/Exception.pm
+lib/App/CmdDispatch/Help.pm
 lib/App/CmdDispatch/IO.pm
 lib/App/CmdDispatch/Table.pm
-lib/App/CmdDispatch/Help.pm
-lib/App/CmdDispatch/Exception.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
@@ -13,6 +13,9 @@ t/00.load.t
 t/config-bad.t
 t/config.t
 t/help.t
+t/help_help.t
+t/help_hint.t
+t/help_new-bad.t
 t/hint.t
 t/lib/Test/IO.pm
 t/new-bad.t
