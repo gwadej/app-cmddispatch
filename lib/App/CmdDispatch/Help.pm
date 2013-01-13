@@ -226,29 +226,70 @@ App::CmdDispatch::Help - Provide help functionality for the CmdDispatch module
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Help version 0.004_03.3
-
+This document describes App::CmdDispatch::Help version 0.004_03
 
 =head1 SYNOPSIS
 
     use App::CmdDispatch::Help;
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-
+This module is mostly loaded directly by the App::CmdDispatch module when
+needed. At present, there are very few reasons for someone to use it directly.
 
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
-
+This module encapsulates the help/hint system for the App::CmdDispatch module.
 
 =head1 INTERFACE
 
-=head2 new()
+=head2 App::CmdDispatch::Help->new( $dispatch, $command, $config )
+
+Construct a new object of type App::CmdDispatch::Help. This object can handle
+the normal help and hint functionality of the commands in the dispatch table.
+
+The first parameter is a reference to the App::CmdDispatch object that contains
+this Help object. It is used to access the command table and the IO
+functionality.
+
+The second parameter is the command hash at the time of creation.
+
+The third parameter is the configuration hash. This contains some values that
+modify the functionality of the help system. The keys of interest are
+
+=over 4
+
+=item help:indent_hint
+
+This string is prepended to the hint for each command. The default value is
+2 spaces.
+
+=item help:pre_hint
+
+This string contains text that is displayed before the list of command hints
+if the hints for all commands are requested. The default value is empty.
+
+=item help:post_hint
+
+This string contains text that is displayed after the list of command and
+alias hints if the hints for all commands and aliases are requested. The
+default value is empty.
+
+=item help:indent_help
+
+This string is prepended to the hint for each command. The default value is
+8 spaces.
+
+=item help:pre_help
+
+This string contains text that is displayed before the list of command help
+if the help for all commands are requested. The default value is empty.
+
+=item help:post_help
+
+This string contains text that is displayed after the list of command and
+alias help if the help for all commands and aliases are requested. The
+default value is empty.
+
+=back
 
 =head2 hint( $dispatch, $cmd )
 
@@ -261,76 +302,29 @@ Print help for the program or just help on the supplied command.
 
 =head2 normalize_command_help( $table )
 
+This method takes a hash of commands and fills in whatever help/hint
+information that it can for the information that is available. Although not
+perfect, it does ensure that there is some information for every command.
+
 =head2 sort_commands( @cmds )
 
-=head1 DIAGNOSTICS
-
-=for author to fill in:
-    List every single error and warning message that the module can
-    generate (even the ones that will "never happen"), with a full
-    explanation of each problem, one or more likely causes, and any
-    suggested remedies.
-
-=over
-
-=item C<< Error message here, perhaps with %s placeholders >>
-
-[Description of error here]
-
-=item C<< Another error message here >>
-
-[Description of error here]
-
-[Et cetera, et cetera]
-
-=back
-
+This subroutine sorts the list of commands. The resulting list contains all
+of the commands except 'help' and 'hint' in sorted order, followed by 'hint'
+then 'help'.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-=for author to fill in:
-    A full explanation of any configuration system(s) used by the
-    module, including the names and locations of any configuration
-    files, and the meaning of any environment variables or properties
-    that can be set. These descriptions must also include details of any
-    configuration language used.
-
 App::CmdDispatch::Help requires no configuration files or environment variables.
-
 
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
 None.
-
 
 =head1 INCOMPATIBILITIES
 
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
 None reported.
 
-
 =head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
 
 No bugs have been reported.
 
@@ -338,10 +332,9 @@ No bugs have been reported.
 
 G. Wade Johnson  C<< wade@anomaly.org >>
 
-
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) <YEAR>, G. Wade Johnson C<< wade@anomaly.org >>. All rights reserved.
+Copyright (c) 2013, G. Wade Johnson C<< wade@anomaly.org >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
