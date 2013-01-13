@@ -2,11 +2,9 @@ package App::CmdDispatch::Table;
 
 use warnings;
 use strict;
+use App::CmdDispatch::Exception;
 
-our $VERSION = '0.004_02';
-
-sub MissingCommand { return "Missing command\n"; }
-sub UnknownCommand { return "Unrecognized command\n"; }
+our $VERSION = '0.004_03';
 
 sub new
 {
@@ -31,7 +29,7 @@ sub run
 {
     my ( $self, $base, $cmd, @args ) = @_;
 
-    die MissingCommand if !defined $cmd || $cmd eq '';
+    die App::CmdDispatch::Exception::MissingCommand->new if !defined $cmd || $cmd eq '';
 
     # Handle alias if one is supplied
     if( exists $self->{alias}->{$cmd} )
@@ -40,7 +38,7 @@ sub run
     }
 
     # Handle builtin commands
-    die UnknownCommand unless $self->{cmds}->{$cmd};
+    die App::CmdDispatch::Exception::UnknownCommand->new( $cmd ) unless $self->{cmds}->{$cmd};
     $self->{cmds}->{$cmd}->{'code'}->( $base, @args );
 
     return;
@@ -126,19 +124,19 @@ App::CmdDispatch::Table - Dispatch table with support for aliases.
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Table version 0.004_02
+This document describes App::CmdDispatch::Table version 0.004_03
 
 =head1 SYNOPSIS
 
     use App::CmdDispatch::Table;
-  
+
 =head1 DESCRIPTION
 
 This module handles the core functionality of the dispatch table system. This
 includes the dispatch table itself and the run() method that dispatches
 requested commands. In addition, this module handles aliasing functionality.
 
-=head1 INTERFACE 
+=head1 INTERFACE
 
 =head2 new( $command_hash, $alias_hash )
 

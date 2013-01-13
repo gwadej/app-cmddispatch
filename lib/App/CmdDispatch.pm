@@ -58,14 +58,9 @@ sub run
         1;
     } or do {
         my $ex = $@;
-        if( $ex eq App::CmdDispatch::Table::MissingCommand() )
+        if( ref $ex )
         {
-            $self->_print( "Missing command\n" );
-            $self->command_hint;
-        }
-        elsif( $ex eq App::CmdDispatch::Table::UnknownCommand() )
-        {
-            $self->_print( "Unrecognized command '$cmd'\n" );
+            $self->_print( $ex->why(), "\n" );
             $self->command_hint;
         }
         else

@@ -16,7 +16,7 @@ use App::CmdDispatch::Table;
         },
     );
 
-    throws_ok { $app->run(); } qr/Missing command/, "Running with no parameters gives error.\n";
+    throws_ok { $app->run(); } 'App::CmdDispatch::Exception::MissingCommand', "Running with no parameters gives error.\n";
 }
 
 {
@@ -26,7 +26,7 @@ use App::CmdDispatch::Table;
         },
     );
 
-    throws_ok { $app->run( {} ); } qr/Missing command/, "Running with no command gives error.\n";
+    throws_ok { $app->run( {} ); } 'App::CmdDispatch::Exception::MissingCommand', "Running with no command gives error.\n";
 }
 
 {
@@ -36,7 +36,7 @@ use App::CmdDispatch::Table;
         },
     );
 
-    throws_ok { $app->run( {}, '' ); } qr/Missing command/, "Running with empty command gives error.\n";
+    throws_ok { $app->run( {}, '' ); } 'App::CmdDispatch::Exception::MissingCommand', "Running with empty command gives error.\n";
 }
 
 {
@@ -56,6 +56,6 @@ use App::CmdDispatch::Table;
         },
     );
 
-    throws_ok { $app->run( {}, 'foo' ); } qr/Unrecognized command/, "Unrecognized command gives error";
+    throws_ok { $app->run( {}, 'foo' ); } 'App::CmdDispatch::Exception::UnknownCommand', "Unrecognized command gives error";
 }
 

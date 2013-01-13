@@ -3,6 +3,7 @@ lib/App/CmdDispatch.pm
 lib/App/CmdDispatch/IO.pm
 lib/App/CmdDispatch/Table.pm
 lib/App/CmdDispatch/Help.pm
+lib/App/CmdDispatch/Exception.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
