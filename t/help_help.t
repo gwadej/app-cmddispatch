@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 use strict;
 use warnings;
@@ -117,5 +117,25 @@ Commands:
         Do nothing n times
 
 This is the post-help text.
+EOF
+}
+
+{
+    my $label = 'abstract added to hint';
+
+    my %commands =
+        ( noop => { code => sub { }, help => 'Do nothing n times', clue => 'noop [n]', abstract => 'Do nothing command' }, );
+    my $io = Test::IO->new();
+    my $app = App::CmdDispatch->new( \%commands, { io => $io }, );
+
+    # Normally this would be created by the above.
+    my $helper = App::CmdDispatch::Help->new( $app, \%commands );
+
+    $helper->help;
+    is $io->output, <<EOF, $label;
+
+Commands:
+  noop [n]   Do nothing command
+        Do nothing n times
 EOF
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use strict;
 use warnings;
@@ -97,3 +97,23 @@ Commands:
 This is the post-hint text.
 EOF
 }
+
+{
+    my $label = 'abstract added to hint';
+
+    my %commands =
+        ( noop => { code => sub { }, help => 'Do nothing n times', clue => 'noop [n]', abstract => 'Do nothing command' }, );
+    my $io = Test::IO->new();
+    my $app = App::CmdDispatch->new( \%commands, { io => $io }, );
+
+    # Normally this would be created by the above.
+    my $helper = App::CmdDispatch::Help->new( $app, \%commands );
+
+    $helper->hint;
+    is $io->output, <<EOF, $label;
+
+Commands:
+  noop [n]   Do nothing command
+EOF
+}
+
