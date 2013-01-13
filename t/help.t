@@ -13,10 +13,12 @@ use App::CmdDispatch;
 
 {
     my $label = 'Single command, handler only';
-    my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
+    my $io    = Test::IO->new();
+    my $app   = App::CmdDispatch->new(
         {
-            noop => { code => sub {} },
+            noop => {
+                code => sub { }
+            },
         },
         { io => $io, default_commands => 'shell help' }
     );
@@ -39,11 +41,9 @@ EOF
 
 {
     my $label = 'Single command, handler and hint';
-    my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        {
-            noop => { code => sub {}, synopsis => 'noop [n]' },
-        },
+    my $io    = Test::IO->new();
+    my $app   = App::CmdDispatch->new(
+        { noop => { code => sub { }, clue => 'noop [n]' }, },
         { io => $io, default_commands => 'shell help' }
     );
 
@@ -65,13 +65,10 @@ EOF
 
 {
     my $label = 'Single command, all supplied';
-    my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        {
-            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
-        },
-        { io => $io, default_commands => 'shell help' }
-    );
+    my $io    = Test::IO->new();
+    my $app   = App::CmdDispatch->new(
+        { noop => { code => sub { }, clue => 'noop [n]', help => 'Does nothing, n times.' }, },
+        { io => $io, default_commands => 'shell help' } );
 
     $app->help;
     is( $io->output, <<EOF, "$label: Default man supplied" );
@@ -164,11 +161,9 @@ EOF
 
 {
     my $label = 'Single command, all supplied, with alias';
-    my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        {
-            noop => { code => sub {}, synopsis => 'noop [n]', help => 'Does nothing, n times.' },
-        },
+    my $io    = Test::IO->new();
+    my $app   = App::CmdDispatch->new(
+        { noop => { code => sub { }, clue => 'noop [n]', help => 'Does nothing, n times.' }, },
         { io => $io, default_commands => 'shell help', alias => { help2 => 'help help' } }
     );
 

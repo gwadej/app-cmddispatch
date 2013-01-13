@@ -8,7 +8,7 @@ use Term::ReadLine;
 use App::CmdDispatch::IO;
 use App::CmdDispatch::Table;
 
-our $VERSION = '0.1';
+our $VERSION = '0.1_01';
 
 sub new
 {
@@ -16,8 +16,8 @@ sub new
 
     $options ||= {};
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
-    die "No commands specified.\n"               unless keys %{$commands};
-    die "Options parameter is not a hashref.\n"  unless $options and ref $options  eq ref {};
+    die "No commands specified.\n" unless keys %{$commands};
+    die "Options parameter is not a hashref.\n" unless $options and ref $options eq ref {};
 
     $options = { %{$options} };
     my $config_file = delete $options->{config};
@@ -34,12 +34,13 @@ sub new
     $aliases = {} unless ref $aliases eq ref {};
 
     $commands = $self->_setup_commands( $commands );
+
     # TODO - replace the hard-coded Table module name with a parameter.
     my $table = App::CmdDispatch::Table->new( $commands, $aliases );
-    if ( $self->{_helper} )
+    if( $self->{_helper} )
     {
         $self->{_helper}->normalize_command_help( $table );
-        $self->{_command_sorter} ||= (ref $self->{_helper})->can( "sort_commands" );
+        $self->{_command_sorter} ||= ( ref $self->{_helper} )->can( "sort_commands" );
     }
     $self->{table} = $table;
     $self->_initialize_io_object();
@@ -57,7 +58,8 @@ sub run
     eval {
         $self->{table}->run( $self, $cmd, @args );
         1;
-    } or do {
+    } or do
+    {
         my $ex = $@;
         if( ref $ex )
         {
@@ -80,7 +82,7 @@ sub command_list
 
 sub command_hint
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
     return $self->{_helper}->hint() if defined $self->{_helper};
     $self->_print( "Commands: ", join( ', ', $self->command_list() ), "\n" );
     return;
@@ -88,11 +90,12 @@ sub command_hint
 
 sub hint
 {
-    my ($self, $arg) = @_;
+    my ( $self, $arg ) = @_;
     eval {
         $self->run( 'hint', $arg );
         1;
-    } or do {
+    } or do
+    {
         return $self->{_helper}->hint( $arg ) if defined $self->{_helper};
         $self->_print( "Commands: ", join( ', ', $self->command_list() ), "\n" );
     };
@@ -101,11 +104,12 @@ sub hint
 
 sub help
 {
-    my ($self, $arg) = @_;
+    my ( $self, $arg ) = @_;
     eval {
         $self->run( 'help', $arg );
         1;
-    } or do {
+    } or do
+    {
         return $self->{_helper}->help( $arg ) if defined $self->{_helper};
         $self->_print( "Commands: ", join( ', ', $self->command_list() ), "\n" );
     };
@@ -132,7 +136,7 @@ sub shell
 sub _print
 {
     my $self = shift;
-    return  $self->{io}->print( @_ );
+    return $self->{io}->print( @_ );
 }
 
 sub _prompt
@@ -155,10 +159,10 @@ sub _initialize_config
 
 sub _initialize_io_object
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     my $io = delete $self->{config}->{'io'};
-    if(!defined $io)
+    if( !defined $io )
     {
         $io = App::CmdDispatch::IO->new();
     }
@@ -173,14 +177,14 @@ sub _initialize_io_object
 
 sub _is_valid_io_object
 {
-    my ($io) = @_;
+    my ( $io ) = @_;
     return unless ref $io;
     return 2 == grep { $io->can( $_ ) } qw/print prompt/;
 }
 
 sub _setup_commands
 {
-    my( $self, $commands ) = @_;
+    my ( $self, $commands ) = @_;
     $commands = { %{$commands} };
 
     return $commands unless $self->{config}->{default_commands};
@@ -190,9 +194,9 @@ sub _setup_commands
         if( $def eq 'shell' )
         {
             $commands->{shell} = {
-                code     => \&App::CmdDispatch::shell,
-                synopsis => 'shell',
-                help     => 'Execute commands as entered until quit.',
+                code => \&App::CmdDispatch::shell,
+                clue => 'shell',
+                help => 'Execute commands as entered until quit.',
             };
         }
         elsif( $def eq 'help' )
@@ -220,7 +224,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch> version 0.1
+This document describes C<App::CmdDispatch> version 0.1_01
 
 =head1 SYNOPSIS
 
@@ -229,22 +233,22 @@ This document describes C<App::CmdDispatch> version 0.1
     my %cmds = (
         start => {
             code => sub { my $app = shift; print "start: @_\n"; },
-            synopsis => 'start [what]',
+            clue => 'start [what]',
             help => 'Start whatever is to be run.',
         },
         stop => {
             code => sub { my $app = shift; print "stop @_\n"; },
-            synopsis => 'stop [what]',
+            clue => 'stop [what]',
             help => 'Stop whatever is to be run.',
         },
         stuff => {
             code => sub { my $app = shift; print "stuff: @_\n"; },
-            synopsis => 'stuff [what]',
+            clue => 'stuff [what]',
             help => 'Stuff to do.',
         },
         jump => {
             code => sub { my $app = shift; print "jump: @_\n"; },
-            synopsis => 'jump [what]',
+            clue => 'jump [what]',
             help => 'Start whatever is to be run.',
         },
     );

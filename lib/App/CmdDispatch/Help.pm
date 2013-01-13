@@ -3,7 +3,7 @@ package App::CmdDispatch::Help;
 use warnings;
 use strict;
 
-our $VERSION = '0.1';
+our $VERSION = '0.1_01';
 
 sub new
 {
@@ -38,14 +38,14 @@ sub _extend_table_with_help
 {
     my ( $commands ) = @_;
     $commands->{help} = {
-        code     => \&_dispatch_help,
-        synopsis => "help [command|alias]",
-        help     => "Display help about commands and/or aliases. Limit display with the\nargument.",
+        code => \&_dispatch_help,
+        clue => "help [command|alias]",
+        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $commands->{hint} = {
-        code     => \&_dispatch_hint,
-        synopsis => "hint [command|alias]",
-        help     => 'A list of commands and/or aliases. Limit display with the argument.',
+        code => \&_dispatch_hint,
+        clue => "hint [command|alias]",
+        help => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     return;
 }
@@ -66,7 +66,7 @@ sub _hint_string
 {
     my ( $self, $cmd ) = @_;
     my $desc = $self->_table->get_command( $cmd );
-    return $desc ? $desc->{synopsis} : $desc;
+    return $desc ? $desc->{clue} : $desc;
 }
 
 sub _help_string
@@ -84,6 +84,7 @@ sub _list_command
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->{owner}->command_list() )
     {
+
         # The following should not be possible. But I'll keep this until
         # I'm absolutely certain.
         next if $c eq '' or !$self->_table->get_command( $c );
@@ -199,8 +200,8 @@ sub normalize_command_help
     foreach my $cmd ( $table->command_list )
     {
         my $desc = $table->get_command( $cmd );
-        $desc->{synopsis} = $cmd unless defined $desc->{synopsis};
-        $desc->{help}     = ''   unless defined $desc->{help};
+        $desc->{clue} = $cmd unless defined $desc->{clue};
+        $desc->{help} = ''   unless defined $desc->{help};
     }
     return;
 }
@@ -229,7 +230,7 @@ App::CmdDispatch::Help - Provide help functionality for the CmdDispatch module
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Help version 0.1
+This document describes App::CmdDispatch::Help version 0.1_01
 
 =head1 SYNOPSIS
 
@@ -262,7 +263,7 @@ from the description hash of each command.
 
 =over 4
 
-=item synopsis
+=item clue
 
 This text is a short blurb showing the format of the command.
 

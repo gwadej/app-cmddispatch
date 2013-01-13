@@ -16,14 +16,11 @@ use App::CmdDispatch::Help;
 {
     my $label = 'help defaults';
 
-    my %commands = (
-        noop => { code => sub {}, help => 'Do nothing n times', synopsis => 'noop [n]' },
-    );
+    my %commands =
+        ( noop => { code => sub { }, help => 'Do nothing n times', clue => 'noop [n]' }, );
     my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        \%commands,
-        { io => $io },
-    );
+    my $app = App::CmdDispatch->new( \%commands, { io => $io }, );
+
     # Normally this would be created by the above.
     my $helper = App::CmdDispatch::Help->new( $app, \%commands );
 
@@ -39,14 +36,10 @@ EOF
 {
     my $label = 'help without command help';
 
-    my %commands = (
-        noop => { code => sub {}, synopsis => 'noop [n]' },
-    );
-    my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        \%commands,
-        { io => $io },
-    );
+    my %commands = ( noop => { code => sub { }, clue => 'noop [n]' }, );
+    my $io       = Test::IO->new();
+    my $app      = App::CmdDispatch->new( \%commands, { io => $io }, );
+
     # Normally this would be created by the above.
     my $helper = App::CmdDispatch::Help->new( $app, \%commands );
 
@@ -61,14 +54,11 @@ EOF
 {
     my $label = 'help indent changed';
 
-    my %commands = (
-        noop => { code => sub {}, help => 'Do nothing n times', synopsis => 'noop [n]' },
-    );
+    my %commands =
+        ( noop => { code => sub { }, help => 'Do nothing n times', clue => 'noop [n]' }, );
     my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        \%commands,
-        { io => $io },
-    );
+    my $app = App::CmdDispatch->new( \%commands, { io => $io }, );
+
     # Normally this would be created by the above.
     my $helper = App::CmdDispatch::Help->new( $app, \%commands, { 'help:indent_help' => '    ' } );
 
@@ -84,16 +74,15 @@ EOF
 {
     my $label = 'Pre-help text';
 
-    my %commands = (
-        noop => { code => sub {}, help => 'Do nothing n times', synopsis => 'noop [n]' },
-    );
+    my %commands =
+        ( noop => { code => sub { }, help => 'Do nothing n times', clue => 'noop [n]' }, );
     my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        \%commands,
-        { io => $io },
-    );
+    my $app = App::CmdDispatch->new( \%commands, { io => $io }, );
+
     # Normally this would be created by the above.
-    my $helper = App::CmdDispatch::Help->new( $app, \%commands, { 'help:pre_help' => 'This is the pre-help text.' } );
+    my $helper =
+        App::CmdDispatch::Help->new( $app, \%commands,
+        { 'help:pre_help' => 'This is the pre-help text.' } );
 
     $helper->help;
     is $io->output, <<EOF, $label;
@@ -109,16 +98,16 @@ EOF
 {
     my $label = 'Post-help text';
 
-    my %commands = (
-        noop => { code => sub {}, help => 'Do nothing n times', synopsis => 'noop [n]' },
-    );
+    my %commands =
+        ( noop => { code => sub { }, help => 'Do nothing n times', clue => 'noop [n]' }, );
     my $io = Test::IO->new();
-    my $app = App::CmdDispatch->new(
-        \%commands,
-        { io => $io }
-    );
+    my $app = App::CmdDispatch->new( \%commands, { io => $io } );
+
     # Normally this would be created by the above.
-    my $helper = App::CmdDispatch::Help->new( $app, \%commands, { 'help:post_help' => 'This is the post-help text.' }, );
+    my $helper =
+        App::CmdDispatch::Help->new( $app, \%commands,
+        { 'help:post_help' => 'This is the post-help text.' },
+        );
 
     $helper->help;
     is $io->output, <<EOF, $label;
