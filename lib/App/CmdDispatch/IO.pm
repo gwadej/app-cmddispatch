@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Term::ReadLine;
 
-our $VERSION = '0.004_01';
+our $VERSION = '0.1';
 
 sub new
 {
@@ -36,13 +36,12 @@ __END__
 
 =head1 NAME
 
-App::CmdDispatch::IO - Abstract out the input and output for App::CmdDispatch
+App::CmdDispatch::IO - Abstract out the input and output for C<App::CmdDispatch>
 
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::IO version 0.004
-
+This document describes C<App::CmdDispatch::IO> version 0.1
 
 =head1 SYNOPSIS
 
@@ -56,7 +55,7 @@ This document describes App::CmdDispatch::IO version 0.004
   
 =head1 DESCRIPTION
 
-This class encapsulates the I/O interface needed by the App::CmdDispatch
+This class encapsulates the I/O interface needed by the L<App::CmdDispatch>
 module. A user can replace this object to provide a different mechanism for
 interacting with the user.
 
@@ -69,7 +68,7 @@ The class supports a relatively small interface.
 
 =head2 new()
 
-Create a new object of type App::CmdDispatch::IO.
+Create a new object of type C<App::CmdDispatch::IO>.
 
 =head2 print( @strings )
 
@@ -86,7 +85,7 @@ user.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-App::CmdDispatch::IO requires no configuration files or environment variables.
+C<App::CmdDispatch::IO> requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
 
@@ -107,11 +106,10 @@ G. Wade Johnson  C<< wade@anomaly.org >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2012, G. Wade Johnson C<< wade@anomaly.org >>. All rights reserved.
+Copyright (c) 2013, G. Wade Johnson C<< wade@anomaly.org >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 

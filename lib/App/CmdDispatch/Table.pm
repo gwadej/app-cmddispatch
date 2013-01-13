@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use App::CmdDispatch::Exception;
 
-our $VERSION = '0.004_03';
+our $VERSION = '0.1';
 
 sub new
 {
@@ -124,16 +124,28 @@ App::CmdDispatch::Table - Dispatch table with support for aliases.
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Table version 0.004_03
+This document describes C<App::CmdDispatch::Table> version 0.1
 
 =head1 SYNOPSIS
 
     use App::CmdDispatch::Table;
 
+    my $table = App::CmdDispatch::Table->new(
+        {
+            foo => { code => \&do_foo, },
+            bar => { code => \&do_bar, },
+        },
+        {
+            foo2 => 'foo again',
+        }
+    );
+
+    $table->run( 'foo', 'twice' );
+
 =head1 DESCRIPTION
 
 This module handles the core functionality of the dispatch table system. This
-includes the dispatch table itself and the run() method that dispatches
+includes the dispatch table itself and the C<run()> method that dispatches
 requested commands. In addition, this module handles aliasing functionality.
 
 =head1 INTERFACE
@@ -147,40 +159,30 @@ the alias maps to.
 
 =head2 run( $cmd, @args )
 
-Given a command string (or possibly an alias) and a set of arguments, execute
-the associated code.
+Given a command string (or possibly an alias) and a set of arguments, this
+method executes the associated code.
 
 =head2 command_list()
 
-Return the list of commands in sorted order. This is basically the keys of the
-dispatch table.
+This method return the list of commands in sorted order. This is basically the
+keys of the dispatch table.
 
 =head2 get_command( $cmd )
 
-Return the hash that represents the the supplied command.
+This method returns the hash that represents the supplied command.
 
 =head2 alias_list()
 
-Return a sorted list of the aliases in this table.
+This method returns a sorted list of the aliases in this table.
 
 =head2 get_alias( $alias )
 
-Return the string that the supplied alias maps to.
+This method returns the string that the supplied alias maps to.
 
 =head2 has_aliases()
 
-Returns a true value if the table has any aliases, otherwise it returns a false
-value.
-
-=head2 MissingCommand()
-
-This class method returns the string that is thrown if run() is called with no
-command.
-
-=head2 UnknownCommand()
-
-This class method returns the string that is thrown if run() is called with a
-command or alias that is not known.
+This method returns a true value if the table has any aliases, otherwise it
+returns a false value.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 

@@ -3,7 +3,7 @@ package App::CmdDispatch::Help;
 use warnings;
 use strict;
 
-our $VERSION = '0.004_03';
+our $VERSION = '0.1';
 
 sub new
 {
@@ -229,7 +229,7 @@ App::CmdDispatch::Help - Provide help functionality for the CmdDispatch module
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Help version 0.004_03
+This document describes App::CmdDispatch::Help version 0.1
 
 =head1 SYNOPSIS
 
@@ -240,20 +240,38 @@ needed. At present, there are very few reasons for someone to use it directly.
 
 =head1 DESCRIPTION
 
-This module encapsulates the help/hint system for the App::CmdDispatch module.
+This module encapsulates the help/hint system for the L<App::CmdDispatch>
+module.
 
 =head1 INTERFACE
 
 =head2 App::CmdDispatch::Help->new( $dispatch, $command, $config )
 
-Construct a new object of type App::CmdDispatch::Help. This object can handle
-the normal help and hint functionality of the commands in the dispatch table.
+Construct a new object of type C<App::CmdDispatch::Help>. This object can
+handle the normal help and hint functionality of the commands in the dispatch
+table.
 
-The first parameter is a reference to the App::CmdDispatch object that contains
-this Help object. It is used to access the command table and the IO
+The first parameter is a reference to the L<App::CmdDispatch> object that
+contains this Help object. It is used to access the command table and the IO
 functionality.
 
-The second parameter is the command hash at the time of creation.
+The second parameter is the command hash at the time of creation. In order to
+provide appropiate help, the command hash should have a few extra pieces of
+information associated with each command. The following keys are extracted 
+from the description hash of each command.
+
+=over 4
+
+=item synopsis
+
+This text is a short blurb showing the format of the command.
+
+=item help
+
+This text is a longer piece of text that describes the commands parameters and
+functionality.
+
+=back
 
 The third parameter is the configuration hash. This contains some values that
 modify the functionality of the help system. The keys of interest are
@@ -296,12 +314,12 @@ default value is empty.
 
 =head2 hint( $dispatch, $cmd )
 
-Print a short hint listing all commands and aliases or just the hint
-for the supplied command.
+This method prints a short hint listing all commands and aliases or just the
+hint for the supplied command.
 
 =head2 help( $dispatch, $cmd )
 
-Print help for the program or just help on the supplied command.
+This method prints help for the program or just help on the supplied command.
 
 =head2 normalize_command_help( $table )
 
@@ -311,13 +329,14 @@ perfect, it does ensure that there is some information for every command.
 
 =head2 sort_commands( @cmds )
 
-This subroutine sorts the list of commands. The resulting list contains all
-of the commands except 'help' and 'hint' in sorted order, followed by 'hint'
-then 'help'.
+This subroutine sorts the list of commands. The resulting list contains all of
+the commands except B<help> and B<hint> in sorted order, followed by B<hint>
+then B<help>.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-App::CmdDispatch::Help requires no configuration files or environment variables.
+C<App::CmdDispatch::Help> requires no configuration files or environment
+variables.
 
 =head1 DEPENDENCIES
 

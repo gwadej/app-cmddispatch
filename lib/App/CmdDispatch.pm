@@ -2,12 +2,13 @@ package App::CmdDispatch;
 
 use warnings;
 use strict;
+
 use Config::Tiny;
 use Term::ReadLine;
 use App::CmdDispatch::IO;
 use App::CmdDispatch::Table;
 
-our $VERSION = '0.004_03';
+our $VERSION = '0.1';
 
 sub new
 {
@@ -219,7 +220,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes App::CmdDispatch version 0.004_03
+This document describes C<App::CmdDispatch> version 0.1
 
 =head1 SYNOPSIS
 
@@ -259,13 +260,14 @@ to code refs. A more complicated dispatch table maps strings to objects that
 provide a wider interface than just a single function call. I often find I want
 more than a single function and less than a full object.
 
-App::CmdDispatch falls in between these two extremes. One thing I always found
-that I needed with my dispatch table-driven scripts was decent help that
-covered all of the commands. App::CmdDispatch makes each command map to a hash
-containing a code reference and a pair of help strings.
+C<App::CmdDispatch> falls in between these two extremes. One thing I always
+found that I needed with my dispatch table-driven scripts was decent help that
+covered all of the commands. C<App::CmdDispatch> makes each command map to a
+hash containing a code reference and some help strings.
 
-Since beginning to use git, I have found git's alias feature to be extremely
-helpful. App::CmdDispatch supports reading aliases from a config file.
+Since beginning to use C<git>, I have found C<git>'s alias feature to be
+extremely helpful. C<App::CmdDispatch> supports reading aliases from a config
+file.
 
 =head1 INTERFACE
 
@@ -285,63 +287,81 @@ object.
 
 =item config_file
 
+This option is the name of a configuration file that is read using the format
+specified in L<Config::Tiny>. This sets default configuration parameters and
+aliases.
+
 =item default_commands
+
+This string provides a space separated list of default command behaviors.
+The two supported behaviors are:
+
+=over 4
+
+=item help
+
+Provide a B<help> command and a B<hint> command through the
+L<App::CmdDispatch::Help> module.
+
+=item shell
+
+Prove a shell interface that loops asking for subcommands. Each command
+is executed and contol returns to the loop.
+
+=back
 
 =item io
 
-=item help:indent_hint
+An object supplying input and output services for the CmdDispatcher. This
+object must provide both a C<print> method and a C<prompt> method. See
+L<App::CmdDispatch::IO> for more information on the interface.
 
-=item help:pre_hint
+=item help:*
 
-=item help:post_hint
-
-=item help:indent_help
-
-=item help:pre_help
-
-=item help:post_help
+The options beginning with the string 'help:' are described in the docs for
+L<App::CmdDispatch::Help>.
 
 =back
 
 =head2 run( $cmd, @args )
 
-Look up the supplied command and execute it.
+This method looks up the supplied command and executes it.
 
 =head2 command_hint( $cmd )
 
-Print a short hint listing all commands and aliases or just the hint
-for the supplied command.
+This method prints a short hint listing all commands and aliases or just the
+hint for the supplied command.
 
 =head2 hint( $cmd )
 
-Print a short hint listing all commands and aliases or just the hint
-for the supplied command.
+This method prints a short hint listing all commands and aliases or just the
+hint for the supplied command.
 
 =head2 help( $cmd )
 
-Print help for the program or just help on the supplied command.
+This method prints help for the program or just help on the supplied command.
 
 =head2 shell()
 
-Start a read/execute loop which supports running multiple commands in the same
-execution of the main program.
+This method start a read/execute loop which supports running multiple commands
+in the same execution of the main program.
 
 =head2 get_config()
 
-Return a reference to the configuration hash for the dispatcher.
+This method returns a reference to the configuration hash for the dispatcher.
 
 =head2 command_list()
 
-Returns the list of commands in a defined order.
+This method returns the list of commands in a defined order.
 
 =head2 alias_list()
 
-Returnd the list of aliases in sorted order.
+This method returns the list of aliases in sorted order.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-App::CmdDispatch can read a configuration file specified in a Config::Tiny supported
-format. Should be specified in the config parameter.
+C<App::CmdDispatch> can read a configuration file specified in a
+L<Config::Tiny> supported format. Should be specified in the config parameter.
 
 =head1 DEPENDENCIES
 
@@ -366,7 +386,7 @@ G. Wade Johnson  C<< <wade@cpan.org> >>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2012, G. Wade Johnson C<< <wade@cpan.org> >>. All rights reserved.
+Copyright (c) 2013, G. Wade Johnson C<< <wade@cpan.org> >>. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.

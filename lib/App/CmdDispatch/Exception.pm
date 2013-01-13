@@ -3,7 +3,7 @@ package App::CmdDispatch::Exception;
 use warnings;
 use strict;
 
-our $VERSION = '0.004_03';
+our $VERSION = '0.1';
 
 sub new
 {
@@ -46,7 +46,7 @@ App::CmdDispatch::Exception - Define exception objects used by CmdDispatch modul
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Exception version 0.004:03
+This document describes App::CmdDispatch::Exception version 0.1
 
 
 =head1 SYNOPSIS
@@ -79,7 +79,8 @@ Method returning a string with a user-readable string explaining the exception.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-App::CmdDispatch::Exception requires no configuration files or environment variables.
+C<App::CmdDispatch::Exception> requires no configuration files or environment
+variables.
 
 =head1 DEPENDENCIES
 
