@@ -7,10 +7,11 @@ our $VERSION = '0.004_03';
 
 sub new
 {
-    my ($class, $owner, $commands, $config) = @_;
+    my ( $class, $owner, $commands, $config ) = @_;
+    $config ||= {};
     die "Command definition is not a hashref.\n" unless ref $commands eq ref {};
     die "No commands specified.\n"               unless keys %{$commands};
-    die "Config parameter is not a hashref.\n"   unless $config and ref $config  eq ref {};
+    die "Config parameter is not a hashref.\n"   unless ref $config   eq ref {};
     die "Invalid owner object.\n" unless eval { $owner->isa( 'App::CmdDispatch' ); };
     _extend_table_with_help( $commands );
     my %conf = (
@@ -28,9 +29,9 @@ sub new
 
 sub _extract_config_parm
 {
-    my ($config, $parm) = @_;
+    my ( $config, $parm ) = @_;
     return unless defined $config->{"help:$parm"};
-    return ($parm => $config->{"help:$parm"});
+    return ( $parm => $config->{"help:$parm"} );
 }
 
 sub _extend_table_with_help
@@ -39,12 +40,12 @@ sub _extend_table_with_help
     $commands->{help} = {
         code     => \&_dispatch_help,
         synopsis => "help [command|alias]",
-        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+        help     => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $commands->{hint} = {
         code     => \&_dispatch_hint,
         synopsis => "hint [command|alias]",
-        help => 'A list of commands and/or aliases. Limit display with the argument.',
+        help     => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     return;
 }
@@ -149,7 +150,8 @@ sub help
         $self->_print( "\n$self->{pre_help}\n" ) if $self->{pre_help};
         $self->_list_command(
             sub {
-                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n",
+                    $self->_help_string( $_[0] ), "\n";
             }
         );
         $self->_list_aliases();
@@ -159,30 +161,20 @@ sub help
 
     if( $self->_table->get_command( $arg ) )
     {
-        $self->_print(
-            "\n",
-            $self->_hint_string( $arg ),
-            "\n",
-            (
-                $self->_help_string( $arg )
-                    || $self->{indent_help} . "No hint for '$arg'"
-            ),
-            "\n"
-        );
+        $self->_print( "\n", $self->_hint_string( $arg ),
+            "\n", ( $self->_help_string( $arg ) || $self->{indent_help} . "No hint for '$arg'" ),
+            "\n" );
     }
     elsif( $self->_table->get_alias( $arg ) )
     {
-        $self->_print(
-            "\n$arg\t: ",
-            $self->_table->get_alias( $arg ),
-            "\n",
-        );
+        $self->_print( "\n$arg\t: ", $self->_table->get_alias( $arg ), "\n", );
     }
     elsif( $arg eq 'commands' )
     {
         $self->_list_command(
             sub {
-                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n", $self->_help_string( $_[0] ), "\n";
+                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n",
+                    $self->_help_string( $_[0] ), "\n";
             }
         );
     }
@@ -217,7 +209,7 @@ sub sort_commands
 
 sub _print
 {
-    my ($self) = shift;
+    my ( $self ) = shift;
     return $self->{owner}->_print( @_ );
 }
 
