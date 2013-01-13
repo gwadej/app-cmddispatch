@@ -66,7 +66,8 @@ sub _hint_string
 {
     my ( $self, $cmd ) = @_;
     my $desc = $self->_table->get_command( $cmd );
-    return $desc ? $desc->{clue} : $desc;
+    return '' unless $desc;
+    return $desc->{clue} . ($desc->{abstract} ? "   $desc->{abstract}" : '');
 }
 
 sub _help_string
