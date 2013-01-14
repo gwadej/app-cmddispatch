@@ -1,5 +1,7 @@
 Revision history for App-CmdDispatch
 
-0.0.1  Sun Oct 21 21:37:16 2012
+0.2  Sun Jan 13 20:05:01 2013
+       Redesign help/hint text to be constructed from multiple pieces.
+       Improve documentation on main module.
+0.1  Sun Jan 13 01:20:01 2013
        Initial release.
-

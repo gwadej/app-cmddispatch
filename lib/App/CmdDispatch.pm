@@ -234,22 +234,26 @@ This document describes C<App::CmdDispatch> version 0.1_01
         start => {
             code => sub { my $app = shift; print "start: @_\n"; },
             clue => 'start [what]',
+            abstract => 'Start something',
             help => 'Start whatever is to be run.',
         },
         stop => {
             code => sub { my $app = shift; print "stop @_\n"; },
             clue => 'stop [what]',
+            abstract => 'Stop something',
             help => 'Stop whatever is to be run.',
         },
         stuff => {
             code => sub { my $app = shift; print "stuff: @_\n"; },
             clue => 'stuff [what]',
+            abstract => 'Do stuff',
             help => 'Stuff to do.',
         },
         jump => {
             code => sub { my $app = shift; print "jump: @_\n"; },
             clue => 'jump [what]',
-            help => 'Start whatever is to be run.',
+            abstract => 'Jump it',
+            help => 'Jump the item requested to be jumped.',
         },
     );
 
@@ -278,9 +282,60 @@ file.
 =head2 new( $cmdhash, $options )
 
 Create a new C<App::CmdDispatch> object. This method can take one or two
-hashrefs as arguments. The first is required and describes the commands.
-The second is optional and provides option information for the
-C<App::CmdDispatch> object.
+hashrefs as arguments.
+
+=head3 The $cmdhash hash
+
+The first is required and describes the commands.  The second is optional and
+provides option information for the C<App::CmdDispatch> object. The keys of the
+hash are the command names. Each value is a hash describing the command. The
+entries in this description hash are dependent on which features are enabled.
+The currently known keys are:
+
+=over 4
+
+=item code
+
+This is the only required key. The value for the key must be a coderef that is
+executed when the command is requested. The parameters for the command are a
+reference to the C<App::CmdDispatch> object that contains the command and a
+list of the parameters that were supplied to the command.
+
+=item clue
+
+This optional parameter provides a clue to the usage of the command. This would
+normally be the command name and some indication of the possible parameters. It
+is used when either the B<hint> or B<help> features of
+L<App::CmdDispatch::Help> are invoked.
+
+If the parameter is not supplied and either B<hint> or B<help> are invoked, the
+name of the command is used by default.
+
+=item abstract
+
+This optional parameter gives a short (less than a line) explanation of the
+command. The idea is to give a hint of the functionality to remind someone who
+is mostly familiar with the commands.
+
+When B<hint> is invoked, the C<abstract> is displayed on the same line as the
+C<clue>.
+
+If the parameter is not supplied and B<hint> is invoked, nothing is used by
+default.
+
+=item help
+
+This optional parameter gives a fuller explanation of the command. It often
+extends across several lines. The idea is to explain the functionality of the
+command to someone that is not familiar with it.
+
+When B<help> is invoked, the C<help> text is displayed after the line
+containing the C<clue>.
+
+If the parameter is not supplied and B<help> is invoked, nothing is used by
+default.
+
+=back
 
 =head3 The $options hash
 

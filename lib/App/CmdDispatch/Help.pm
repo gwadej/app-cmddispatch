@@ -64,10 +64,19 @@ sub _dispatch_hint
 
 sub _hint_string
 {
+    my ( $self, $cmd, $maxlen ) = @_;
+    my $desc = $self->_table->get_command( $cmd );
+    return '' unless $desc;
+    my $indent = ( $maxlen ? ' ' x (3 + $maxlen-length $desc->{clue}) : '   ' );
+    return $desc->{clue} . ($desc->{abstract} ? $indent . $desc->{abstract} : '');
+}
+
+sub _clue_string
+{
     my ( $self, $cmd ) = @_;
     my $desc = $self->_table->get_command( $cmd );
     return '' unless $desc;
-    return $desc->{clue} . ($desc->{abstract} ? '   ' . $desc->{abstract} : '');
+    return $desc->{clue};
 }
 
 sub _help_string
@@ -115,8 +124,15 @@ sub hint
 
     if( _is_missing( $arg ) )
     {
+        my $maxlen = 0;
+        my $len;
+        foreach my $cmd ( $self->_table->command_list() )
+        {
+            $len = length $self->_table->get_command( $cmd )->{clue};
+            $maxlen = $len if $len > $maxlen;
+        }
         $self->_print( "\n$self->{pre_hint}\n" ) if $self->{pre_hint};
-        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n"; } );
+        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0], $maxlen ), "\n"; } );
         $self->_list_aliases();
         $self->_print( "\n$self->{post_hint}\n" ) if $self->{post_hint};
         return;
@@ -155,7 +171,7 @@ sub help
         $self->_print( "\n$self->{pre_help}\n" ) if $self->{pre_help};
         $self->_list_command(
             sub {
-                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n",
+                $self->{indent_hint}, $self->_clue_string( $_[0] ), "\n",
                     $self->_help_string( $_[0] ), "\n";
             }
         );
@@ -166,7 +182,7 @@ sub help
 
     if( $self->_table->get_command( $arg ) )
     {
-        $self->_print( "\n", $self->_hint_string( $arg ),
+        $self->_print( "\n", $self->_clue_string( $arg ),
             "\n", ( $self->_help_string( $arg ) || $self->{indent_help} . "No help for '$arg'" ),
             "\n" );
     }
@@ -178,7 +194,7 @@ sub help
     {
         $self->_list_command(
             sub {
-                $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n",
+                $self->{indent_hint}, $self->_clue_string( $_[0] ), "\n",
                     $self->_help_string( $_[0] ), "\n";
             }
         );

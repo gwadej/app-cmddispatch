@@ -135,7 +135,7 @@ EOF
     is $io->output, <<EOF, $label;
 
 Commands:
-  noop [n]   Do nothing command
+  noop [n]
         Do nothing n times
 EOF
 }
