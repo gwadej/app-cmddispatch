@@ -14,6 +14,12 @@ WriteMakefile(
         'Config::Tiny' => 0,
         'Term::ReadLine' => 0,
     },
+    LICENSE             => 'perl',
+    META_MERGE          => {
+        resources => {
+            repository => 'https://github.com/gwadej/app-cmddispatch',
+        },
+    },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'App-CmdDispatch-*' },
 );
