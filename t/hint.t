@@ -29,8 +29,8 @@ use App::CmdDispatch;
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 }
 
@@ -48,8 +48,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 }
 
@@ -66,8 +66,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 
     $io->clear;
@@ -77,8 +77,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 
     $io->clear;
@@ -88,8 +88,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 
     $io->clear;
@@ -107,7 +107,7 @@ EOF
     $app->hint( 'hint' );
     is( $io->output, <<EOF, "$label: hint supplied to hint" );
 
-hint [command|alias]
+hint [command|alias]   Display command hints
 EOF
 
     $io->clear;
@@ -117,8 +117,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 
     $io->clear;
@@ -140,8 +140,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 
 Aliases:
   help2\t: help help
@@ -154,8 +154,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 
 Aliases:
   help2\t: help help
@@ -168,8 +168,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 
 Aliases:
   help2\t: help help
@@ -190,7 +190,7 @@ EOF
     $app->hint( 'hint' );
     is( $io->output, <<EOF, "$label: hint supplied to hint" );
 
-hint [command|alias]
+hint [command|alias]   Display command hints
 EOF
 
     $io->clear;
@@ -200,8 +200,8 @@ EOF
 Commands:
   noop [n]
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 
     $io->clear;

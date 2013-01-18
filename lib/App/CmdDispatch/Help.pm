@@ -3,7 +3,7 @@ package App::CmdDispatch::Help;
 use warnings;
 use strict;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 sub new
 {
@@ -38,14 +38,16 @@ sub _extend_table_with_help
 {
     my ( $commands ) = @_;
     $commands->{help} = {
-        code => \&_dispatch_help,
-        clue => "help [command|alias]",
-        help => "Display help about commands and/or aliases. Limit display with the\nargument.",
+        code     => \&_dispatch_help,
+        clue     => "help [command|alias]",
+        abstract => 'Display complete help',
+        help     => "Display help about commands and/or aliases. Limit display with the\nargument.",
     };
     $commands->{hint} = {
-        code => \&_dispatch_hint,
-        clue => "hint [command|alias]",
-        help => 'A list of commands and/or aliases. Limit display with the argument.',
+        code     => \&_dispatch_hint,
+        clue     => "hint [command|alias]",
+        abstract => 'Display command hints',
+        help     => 'A list of commands and/or aliases. Limit display with the argument.',
     };
     return;
 }
@@ -67,8 +69,8 @@ sub _hint_string
     my ( $self, $cmd, $maxlen ) = @_;
     my $desc = $self->_table->get_command( $cmd );
     return '' unless $desc;
-    my $indent = ( $maxlen ? ' ' x (3 + $maxlen-length $desc->{clue}) : '   ' );
-    return $desc->{clue} . ($desc->{abstract} ? $indent . $desc->{abstract} : '');
+    my $indent = ( $maxlen ? ' ' x ( 3 + $maxlen - length $desc->{clue} ) : '   ' );
+    return $desc->{clue} . ( $desc->{abstract} ? $indent . $desc->{abstract} : '' );
 }
 
 sub _clue_string
@@ -77,6 +79,12 @@ sub _clue_string
     my $desc = $self->_table->get_command( $cmd );
     return '' unless $desc;
     return $desc->{clue};
+}
+
+sub _alias_hint
+{
+    my ($self, $alias) = @_;
+    return "$alias\t: " . $self->_table->get_alias( $alias );
 }
 
 sub _help_string
@@ -94,7 +102,6 @@ sub _list_command
     $self->_print( "\nCommands:\n" );
     foreach my $c ( $self->{owner}->command_list() )
     {
-
         # The following should not be possible. But I'll keep this until
         # I'm absolutely certain.
         next if $c eq '' or !$self->_table->get_command( $c );
@@ -111,7 +118,7 @@ sub _list_aliases
     $self->_print( "\nAliases:\n" );
     foreach my $c ( $self->{owner}->alias_list() )
     {
-        $self->_print( "$self->{indent_hint}$c\t: " . $self->_table->get_alias( $c ) . "\n" );
+        $self->_print( $self->{indent_hint} . $self->_alias_hint( $c ) . "\n" );
     }
     return;
 }
@@ -132,7 +139,8 @@ sub hint
             $maxlen = $len if $len > $maxlen;
         }
         $self->_print( "\n$self->{pre_hint}\n" ) if $self->{pre_hint};
-        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0], $maxlen ), "\n"; } );
+        $self->_list_command(
+            sub { $self->{indent_hint}, $self->_hint_string( $_[0], $maxlen ), "\n"; } );
         $self->_list_aliases();
         $self->_print( "\n$self->{post_hint}\n" ) if $self->{post_hint};
         return;
@@ -144,7 +152,7 @@ sub hint
     }
     elsif( $self->_table->get_alias( $arg ) )
     {
-        $self->_print( "\n$arg\t: ", $self->_table->get_alias( $arg ), "\n" );
+        $self->_print( "\n", $self->_alias_hint( $arg ), "\n" );
     }
     elsif( $arg eq 'commands' )
     {
@@ -188,7 +196,7 @@ sub help
     }
     elsif( $self->_table->get_alias( $arg ) )
     {
-        $self->_print( "\n$arg\t: ", $self->_table->get_alias( $arg ), "\n", );
+        $self->_print( "\n", $self->_alias_hint( $arg ), "\n" );
     }
     elsif( $arg eq 'commands' )
     {
@@ -218,6 +226,7 @@ sub normalize_command_help
     {
         my $desc = $table->get_command( $cmd );
         $desc->{clue} = $cmd unless defined $desc->{clue};
+        $desc->{hint} = ''   unless defined $desc->{hint};
         $desc->{help} = ''   unless defined $desc->{help};
     }
     return;

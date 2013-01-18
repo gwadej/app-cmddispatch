@@ -27,8 +27,8 @@ Missing command
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 }
 
@@ -48,8 +48,8 @@ Missing command
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 }
 
@@ -68,8 +68,8 @@ EOF
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 }
 
@@ -89,8 +89,8 @@ Unrecognized command 'foo'
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 }
 

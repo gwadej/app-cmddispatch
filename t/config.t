@@ -73,8 +73,8 @@ EOF
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 
 Aliases:
   help2	: help help
@@ -167,8 +167,8 @@ EOF
 Commands:
   noop
   shell
-  hint [command|alias]
-  help [command|alias]
+  hint [command|alias]   Display command hints
+  help [command|alias]   Display complete help
 EOF
 
     $io->clear;
