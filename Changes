@@ -1,9 +1,10 @@
 Revision history for App-CmdDispatch
 
-0.3  Thu Jan 17 21:05:01 2013
+0.3  Thu Jan 17 21:45:01 2013
        Added abstract for help, hint, and shell.
        Correct abstract offset handling for 'hint commands'.
        Update metadata to list repo.
+       Corrected usage of Term::ReadLine module.
 0.2  Sun Jan 13 20:05:01 2013
        Redesign help/hint text to be constructed from multiple pieces.
        Improve documentation on main module.
