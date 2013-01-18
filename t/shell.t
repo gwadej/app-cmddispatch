@@ -31,7 +31,7 @@ shell_is( "hint\nquit\n", qq{Enter a command or 'quit' to exit:
 > 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 > },  'Shell to help' );

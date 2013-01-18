@@ -125,19 +125,27 @@ sub _list_aliases
 
 sub _is_missing { return !defined $_[0] || $_[0] eq ''; }
 
+sub _get_abstract_offset
+{
+    my ( $self ) = @_;
+
+    my $maxlen = 0;
+    my $len;
+    foreach my $cmd ( $self->_table->command_list() )
+    {
+        $len = length $self->_table->get_command( $cmd )->{clue};
+        $maxlen = $len if $len > $maxlen;
+    }
+    return $maxlen;
+}
+
 sub hint
 {
     my ( $self, $arg ) = @_;
 
     if( _is_missing( $arg ) )
     {
-        my $maxlen = 0;
-        my $len;
-        foreach my $cmd ( $self->_table->command_list() )
-        {
-            $len = length $self->_table->get_command( $cmd )->{clue};
-            $maxlen = $len if $len > $maxlen;
-        }
+        my $maxlen = $self->_get_abstract_offset();
         $self->_print( "\n$self->{pre_hint}\n" ) if $self->{pre_hint};
         $self->_list_command(
             sub { $self->{indent_hint}, $self->_hint_string( $_[0], $maxlen ), "\n"; } );
@@ -156,7 +164,8 @@ sub hint
     }
     elsif( $arg eq 'commands' )
     {
-        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0] ), "\n"; } );
+        my $maxlen = $self->_get_abstract_offset();
+        $self->_list_command( sub { $self->{indent_hint}, $self->_hint_string( $_[0], $maxlen ), "\n"; } );
     }
     elsif( $arg eq 'aliases' )
     {

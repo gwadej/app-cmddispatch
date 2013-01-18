@@ -72,7 +72,7 @@ EOF
 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 
@@ -166,7 +166,7 @@ EOF
 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 EOF

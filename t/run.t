@@ -26,7 +26,7 @@ Missing command
 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 EOF
@@ -47,7 +47,7 @@ Missing command
 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 EOF
@@ -67,7 +67,7 @@ EOF
 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 EOF
@@ -88,7 +88,7 @@ Unrecognized command 'foo'
 
 Commands:
   noop
-  shell
+  shell                  Launch an interactive command shell.
   hint [command|alias]   Display command hints
   help [command|alias]   Display complete help
 EOF
