@@ -265,7 +265,7 @@ App::CmdDispatch::Help - Provide help functionality for the CmdDispatch module
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Help version 0.2
+This document describes App::CmdDispatch::Help version 0.3
 
 =head1 SYNOPSIS
 

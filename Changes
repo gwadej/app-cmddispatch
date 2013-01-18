@@ -1,6 +1,6 @@
 Revision history for App-CmdDispatch
 
-0.3  Thu Jan 17 21:45:01 2013
+0.3  Thu Jan 17 22:00:00 2013
        Added abstract for help, hint, and shell.
        Correct abstract offset handling for 'hint commands'.
        Update metadata to list repo.

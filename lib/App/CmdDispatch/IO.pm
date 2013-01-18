@@ -6,10 +6,11 @@ use Term::ReadLine;
 
 our $VERSION = '0.3';
 
+my $term;
 sub new
 {
     my $class = shift;
-    my $term = Term::ReadLine->new();
+    $term ||= Term::ReadLine->new('CmdDispatch Shell');
     $term->ornaments( 0 );
     return bless { term => $term }, $class;
 }

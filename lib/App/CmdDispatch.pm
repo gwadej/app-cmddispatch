@@ -225,7 +225,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch> version 0.2
+This document describes C<App::CmdDispatch> version 0.3
 
 =head1 SYNOPSIS
 
