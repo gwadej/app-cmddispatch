@@ -23,7 +23,8 @@ help2=help help
 EOF
     close $ft;
 
-    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename } );
+    my $io = Test::IO->new;
+    my $app = App::CmdDispatch->new( { noop => { code => sub {} } }, { config => $ft->filename, io => $io } );
     my $actual = $app->get_config;
     is_deeply( $actual, { parm1 => 1771, parm2 => 7171 }, 'Config is loaded.' )
         or note explain $actual;

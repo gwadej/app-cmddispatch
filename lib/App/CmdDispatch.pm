@@ -8,7 +8,7 @@ use Term::ReadLine;
 use App::CmdDispatch::IO;
 use App::CmdDispatch::Table;
 
-our $VERSION = '0.3';
+our $VERSION = '0.3_01';
 
 sub new
 {
@@ -164,7 +164,12 @@ sub _initialize_io_object
     my $io = delete $self->{config}->{'io'};
     if( !defined $io )
     {
-        $io = App::CmdDispatch::IO->new();
+        eval {
+            $io = App::CmdDispatch::IO->new();
+        } or do {
+            $io = App::CmdDispatch::MinimalIO->new();
+        };
+        die "Unable to create an IO object for CmdDispatch.\n" unless defined $io;
     }
     elsif( !_is_valid_io_object( $io ) )
     {
@@ -225,7 +230,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch> version 0.3
+This document describes C<App::CmdDispatch> version 0.3_01
 
 =head1 SYNOPSIS
 

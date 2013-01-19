@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Term::ReadLine;
 
-our $VERSION = '0.3';
+our $VERSION = '0.3_01';
 
 my $term;
 sub new
@@ -33,6 +33,34 @@ sub prompt
     return $self->{term}->readline( @in );
 }
 
+{
+    package App::CmdDispatch::MinimalIO;
+
+    sub new
+    {
+        my $class = @_;
+        return bless {}, $class;
+    }
+
+    sub print
+    {
+        my $self = shift;
+        return CORE::print @_;
+    }
+
+    sub readline
+    {
+        my ($self) = @_;
+        return CORE::readline;
+    }
+
+    sub prompt
+    {
+        my ($self, @in) = @_;
+        $self->print( @in );
+        return $self->readline();
+    }
+}
 1;
 __END__
 
@@ -43,7 +71,7 @@ App::CmdDispatch::IO - Abstract out the input and output for C<App::CmdDispatch>
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch::IO> version 0.3
+This document describes C<App::CmdDispatch::IO> version 0.3_01
 
 =head1 SYNOPSIS
 

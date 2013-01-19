@@ -1,5 +1,7 @@
 Revision history for App-CmdDispatch
 
+0.03_01 Sat Jan 19 12:35:00 2013
+       Attempt to fix reported CPANTESTERS errors with IO.
 0.3  Thu Jan 17 22:00:00 2013
        Added abstract for help, hint, and shell.
        Correct abstract offset handling for 'hint commands'.
