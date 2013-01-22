@@ -8,7 +8,7 @@ use Term::ReadLine;
 use App::CmdDispatch::IO;
 use App::CmdDispatch::Table;
 
-our $VERSION = '0.3_01';
+our $VERSION = '0.4';
 
 sub new
 {
@@ -230,7 +230,7 @@ App::CmdDispatch - Handle command line processing for programs with subcommands
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch> version 0.3_01
+This document describes C<App::CmdDispatch> version 0.4
 
 =head1 SYNOPSIS
 

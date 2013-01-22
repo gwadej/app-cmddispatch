@@ -1,6 +1,8 @@
 Revision history for App-CmdDispatch
 
-0.03_01 Sat Jan 19 12:35:00 2013
+0.4  Mon Jan 21 22:02:35 2013
+       CPANTESTERS passing. Upgrade version to release.
+0.3_01 Sat Jan 19 12:35:00 2013
        Attempt to fix reported CPANTESTERS errors with IO.
 0.3  Thu Jan 17 22:00:00 2013
        Added abstract for help, hint, and shell.

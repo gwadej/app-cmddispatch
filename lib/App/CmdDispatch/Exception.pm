@@ -3,7 +3,7 @@ package App::CmdDispatch::Exception;
 use warnings;
 use strict;
 
-our $VERSION = '0.3_01';
+our $VERSION = '0.4';
 
 sub new
 {
@@ -46,7 +46,7 @@ App::CmdDispatch::Exception - Define exception objects used by CmdDispatch modul
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Exception version 0.3_01
+This document describes App::CmdDispatch::Exception version 0.4
 
 
 =head1 SYNOPSIS
