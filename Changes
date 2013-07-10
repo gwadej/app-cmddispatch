@@ -1,5 +1,7 @@
 Revision history for App-CmdDispatch
 
+0.41 Tue Jul 09 21:44:00 2013
+       Correct handling of autodie exceptions 
 0.4  Mon Jan 21 22:02:35 2013
        CPANTESTERS passing. Upgrade version to release.
 0.3_01 Sat Jan 19 12:35:00 2013

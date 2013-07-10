@@ -2,7 +2,7 @@ NAME
     App::CmdDispatch - Handle commands with a dispatch table
     
 VERSION
-    Version 0.04_01
+    Version 0.41
 
 SYNOPSIS
 
