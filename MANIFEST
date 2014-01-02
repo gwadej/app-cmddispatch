@@ -7,7 +7,6 @@ lib/App/CmdDispatch/Table.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-MYMETA.yml
 README
 t/00.load.t
 t/config-bad.t
@@ -25,3 +24,7 @@ t/shell.t
 t/table_new-bad.t
 t/table_new.t
 t/table_run.t
+xt/critic.t
+xt/hasversion.t
+xt/podcoverage.t
+xt/pod.t

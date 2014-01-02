@@ -16,10 +16,18 @@ WriteMakefile(
     },
     LICENSE             => 'perl',
     META_MERGE          => {
+        'meta-spec' => { version => 2 },
         resources => {
-            repository => 'https://github.com/gwadej/app-cmddispatch',
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/gwadej/app-cmddispatch.git',
+                web  => 'https://github.com/gwadej/app-cmddispatch',
+            },
         },
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'App-CmdDispatch-*' },
+    test               => {
+        TESTS => 't/*.t xt/*.t',
+    },
 );
