@@ -26,5 +26,6 @@ t/table_new.t
 t/table_run.t
 xt/critic.t
 xt/hasversion.t
+xt/minimumversion.t
 xt/podcoverage.t
 xt/pod.t

@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
     NAME                => 'App::CmdDispatch',
-    AUTHOR              => 'G. Wade Johnson <wade@cpan.org>',
+    AUTHOR              => 'G. Wade Johnson <gwadej@cpan.org>',
     VERSION_FROM        => 'lib/App/CmdDispatch.pm',
     ABSTRACT_FROM       => 'lib/App/CmdDispatch.pm',
     PL_FILES            => {},
@@ -25,8 +25,9 @@ WriteMakefile(
             },
         },
     },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'App-CmdDispatch-*' },
+    MIN_PERL_VERSION   => 5.006,
+    dist               => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean              => { FILES => 'App-CmdDispatch-*' },
     test               => {
         TESTS => 't/*.t xt/*.t',
     },
