@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Term::ReadLine;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 my $term;
 sub new
@@ -71,7 +71,7 @@ App::CmdDispatch::IO - Abstract out the input and output for C<App::CmdDispatch>
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch::IO> version 0.41
+This document describes C<App::CmdDispatch::IO> version 0.42
 
 =head1 SYNOPSIS
 

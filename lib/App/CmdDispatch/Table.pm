@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use App::CmdDispatch::Exception;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 sub new
 {
@@ -124,7 +124,7 @@ App::CmdDispatch::Table - Dispatch table with support for aliases.
 
 =head1 VERSION
 
-This document describes C<App::CmdDispatch::Table> version 0.41
+This document describes C<App::CmdDispatch::Table> version 0.42
 
 =head1 SYNOPSIS
 
