@@ -7,15 +7,24 @@ WriteMakefile(
     AUTHOR              => 'G. Wade Johnson <gwadej@cpan.org>',
     VERSION_FROM        => 'lib/App/CmdDispatch.pm',
     ABSTRACT_FROM       => 'lib/App/CmdDispatch.pm',
+    LICENSE             => 'perl',
+    MIN_PERL_VERSION    => 5.006,
+    EXE_FILES           => [],
     PL_FILES            => {},
-    PREREQ_PM => {
+    CONFIGURE_REQUIRES  => {
+        'ExtUtils::MakeMaker' => 0,
+    },
+    BUILD_REQUIRES => {
         'Test::More' => 0,
+    },
+    PREREQ_PM => {
         'Test::Exception' => 0,
         'Config::Tiny' => 0,
         'Term::ReadLine' => 0,
     },
-    LICENSE             => 'perl',
-    META_MERGE          => {
+    dist               => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    clean              => { FILES => 'App-CmdDispatch-*' },
+    META_MERGE         => {
         'meta-spec' => { version => 2 },
         resources => {
             repository => {
@@ -25,9 +34,6 @@ WriteMakefile(
             },
         },
     },
-    MIN_PERL_VERSION   => 5.006,
-    dist               => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean              => { FILES => 'App-CmdDispatch-*' },
     test               => {
         TESTS => 't/*.t xt/*.t',
     },
