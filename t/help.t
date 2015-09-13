@@ -182,7 +182,7 @@ Commands:
         argument.
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
@@ -201,7 +201,7 @@ Commands:
         argument.
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
@@ -220,7 +220,7 @@ Commands:
         argument.
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
@@ -265,13 +265,13 @@ EOF
     is( $io->output, <<EOF, "$label: help request on aliases" );
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
     $io->clear;
     $app->help( 'help2' );
     is( $io->output, <<EOF, "$label: 'aliases' supplied to help, with no aliases" );
 
-help2\t: help help
+help2 : help help
 EOF
 }
 

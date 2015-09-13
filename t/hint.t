@@ -144,7 +144,7 @@ Commands:
   help [command|alias]   Display complete help
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
@@ -158,7 +158,7 @@ Commands:
   help [command|alias]   Display complete help
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
@@ -172,7 +172,7 @@ Commands:
   help [command|alias]   Display complete help
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
@@ -209,13 +209,13 @@ EOF
     is( $io->output, <<EOF, "$label: ask for alias list" );
 
 Aliases:
-  help2\t: help help
+  help2 : help help
 EOF
 
     $io->clear;
     $app->hint( 'help2' );
     is( $io->output, <<EOF, "$label: alias supplied to hint" );
 
-help2\t: help help
+help2 : help help
 EOF
 }

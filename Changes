@@ -1,8 +1,9 @@
 Revision history for App-CmdDispatch
 
-???? ??????????
+0.43 2015-09-12
   - Declare a minimum perl version in Makefile.PL
   - Test for minimum perl version in author tests
+  - Make alias help cleaner for aliases with different lengths
 0.42 2014-08-16T22:10:00-0500
   - Modify testing code to use xt-based author tests
   - Update metadata for more repo information

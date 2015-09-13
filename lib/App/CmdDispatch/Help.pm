@@ -3,7 +3,7 @@ package App::CmdDispatch::Help;
 use warnings;
 use strict;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 sub new
 {
@@ -23,6 +23,7 @@ sub new
         _extract_config_parm( $config, 'indent_help' ),
         _extract_config_parm( $config, 'pre_help' ),
         _extract_config_parm( $config, 'post_help' ),
+        alias_len   => 1,
     );
     return bless { owner => $owner, %conf }, $class;
 }
@@ -84,7 +85,7 @@ sub _clue_string
 sub _alias_hint
 {
     my ($self, $alias) = @_;
-    return "$alias\t: " . $self->_table->get_alias( $alias );
+    return sprintf "%-$self->{alias_len}s : %s", $alias, $self->_table->get_alias( $alias );
 }
 
 sub _help_string
@@ -110,11 +111,24 @@ sub _list_command
     return;
 }
 
+sub _find_longest_alias
+{
+    my ( $self ) = @_;
+    my $len;
+    foreach my $c ( $self->{owner}->alias_list() )
+    {
+        $len = length $c;
+        $self->{alias_len} = $len if $len > $self->{alias_len};
+    }
+    return;
+}
+
 sub _list_aliases
 {
     my ( $self ) = @_;
     return unless $self->_table->has_aliases;
 
+    $self->_find_longest_alias();
     $self->_print( "\nAliases:\n" );
     foreach my $c ( $self->{owner}->alias_list() )
     {
@@ -265,7 +279,7 @@ App::CmdDispatch::Help - Provide help functionality for the CmdDispatch module
 
 =head1 VERSION
 
-This document describes App::CmdDispatch::Help version 0.42
+This document describes App::CmdDispatch::Help version 0.43
 
 =head1 SYNOPSIS
 
@@ -293,7 +307,7 @@ functionality.
 
 The second parameter is the command hash at the time of creation. In order to
 provide appropiate help, the command hash should have a few extra pieces of
-information associated with each command. The following keys are extracted 
+information associated with each command. The following keys are extracted
 from the description hash of each command.
 
 =over 4

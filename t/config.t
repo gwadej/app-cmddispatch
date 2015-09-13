@@ -78,8 +78,8 @@ Commands:
   help [command|alias]   Display complete help
 
 Aliases:
-  help2	: help help
-  list	: hint
+  help2 : help help
+  list  : hint
 EOF
 }
 
@@ -142,8 +142,8 @@ EOF
     is( $io->output, <<EOF, 'Verify help aliases' );
 
 Aliases:
-  help2\t: help help
-  list\t: hint
+  help2 : help help
+  list  : hint
 EOF
 }
 
@@ -177,7 +177,7 @@ EOF
     is( $io->output, <<EOF, 'Verify hint aliases' );
 
 Aliases:
-  help2\t: help help
-  list\t: hint
+  help2 : help help
+  list  : hint
 EOF
 }
