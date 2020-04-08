@@ -62,12 +62,16 @@ DEPENDENCIES
     Config::Tiny
     Term::Readline
 
+ACKNOWLEDGEMENTS
+
+   Thanks to Dan Muey for bug reports.
+
 AUTHOR
     G. Wade Johnson, <wade at cpan.org>
 
 COPYRIGHT AND LICENCE
 
-    Copyright (C) 2012, G. Wade Johnson
+    Copyright (C) 2012-2020, G. Wade Johnson
 
     This library is free software; you can redistribute it and/or modify
     it under the same terms as Perl itself.
